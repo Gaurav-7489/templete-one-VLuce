@@ -31,7 +31,7 @@ export function ShortlistView({ vehicles }: { vehicles: Vehicle[] }) {
           <button type="button" className="btn btn--sm btn--ghost" onClick={clear}>Clear</button>
         </div>
       </div>
-      <div className="results">
+      <div className="lgrid">
         {saved.map((v) => <VehicleCard key={v.slug} v={v} />)}
       </div>
     </>

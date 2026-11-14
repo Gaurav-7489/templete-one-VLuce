@@ -8,7 +8,7 @@ export const revalidate = 300;
 export default async function ShortlistPage() {
   const vehicles = await getInventory();
   return (
-    <>
+    <div className="theme-light">
       <section className="page-hero">
         <div className="wrap page-hero__row">
           <div>
@@ -23,6 +23,6 @@ export default async function ShortlistPage() {
           <ShortlistView vehicles={vehicles} />
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ import { VehicleCard } from "../VehicleCard";
 
 export function CollectionPreview({ vehicles, total }: { vehicles: Vehicle[]; total: number }) {
   return (
-    <section className="section" aria-labelledby="collection-title">
+    <section className="section theme-light" aria-labelledby="collection-title">
       <div className="wrap">
         <div className="head">
           <Reveal>
@@ -20,7 +20,7 @@ export function CollectionPreview({ vehicles, total }: { vehicles: Vehicle[]; to
             <Link href="/collection" className="link">View all {total} vehicles <Arrow /></Link>
           </Reveal>
         </div>
-        <div className="showcase">
+        <div className="lgrid" style={{ paddingBottom: 0 }}>
           {vehicles.map((v, i) => (
             <Reveal key={v.slug} delay={(i % 3) * 0.08}>
               <VehicleCard v={v} />

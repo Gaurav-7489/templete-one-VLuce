@@ -16,7 +16,7 @@ export const revalidate = 300;
 export default async function Home() {
   const all = applyFilters(await getInventory(), {});
   const featured = all.find((v) => v.featured && v.availability === "available") ?? all[0];
-  const preview = all.filter((v) => v !== featured && v.availability !== "coming-soon").slice(0, 5);
+  const preview = all.filter((v) => v !== featured && v.availability !== "coming-soon").slice(0, 6);
 
   const counts = new Map<string, number>();
   for (const v of all) counts.set(v.brand, (counts.get(v.brand) ?? 0) + 1);

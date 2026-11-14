@@ -26,7 +26,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { themeColor: "#090a0b", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const brands = (await getBrands()).map((b) => b.brand).sort((a, b) => (brandOrder.indexOf(a) + 1 || 99) - (brandOrder.indexOf(b) + 1 || 99));
+  const stock = (await getBrands()).sort((a, b) => (brandOrder.indexOf(a.brand) + 1 || 99) - (brandOrder.indexOf(b.brand) + 1 || 99));
+  const brands = stock.map((b) => b.brand);
   const org = {
     "@context": "https://schema.org",
     "@type": "AutoDealer",
@@ -50,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en-IN" className={`${manrope.variable} ${inter.variable} ${serif.variable}`}>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
-        <Header brands={brands} />
+        <Header brands={stock} />
         <main id="main">{children}</main>
         <Footer brands={brands} />
         <WhatsAppFab />

@@ -5,6 +5,13 @@ const u = (id: string, w = 1600) => `https://images.unsplash.com/photo-${id}?aut
 /** Display order for the "Explore by Brand" section. Brands without listings are shown as "coming soon" or hidden (see BrandIndex). */
 export const brandOrder = ["Porsche", "Mercedes-Benz", "BMW", "Audi", "Land Rover", "Jaguar", "Volvo", "Lexus", "MINI"];
 
+/** Every brand shown in the header's Brand panel. Brands without stock link to the collection's empty state. */
+export const brandDirectory = [
+  "Aston Martin", "Audi", "Bentley", "BMW", "BYD", "Cadillac", "Ferrari", "Ford", "Honda", "Hyundai",
+  "Jaguar", "Jeep", "Kia", "Lamborghini", "Land Rover", "Lexus", "Mahindra", "Maserati", "Maybach", "McLaren",
+  "Mercedes-Benz", "MG", "MINI", "Nissan", "Porsche", "Rolls-Royce", "Skoda", "Tesla", "Toyota", "Volkswagen", "Volvo",
+];
+
 export type LifestyleMeta = { key: Lifestyle; title: string; line: string; image: string };
 
 export const lifestyles: LifestyleMeta[] = [

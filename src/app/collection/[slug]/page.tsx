@@ -105,7 +105,7 @@ export default async function VehiclePage({ params }: Params) {
   };
 
   return (
-    <div className="has-mobile-bar">
+    <div className="has-mobile-bar theme-light">
       <section className="vd-hero">
         <div className="wrap">
           <ol className="crumbs" aria-label="Breadcrumb">
@@ -202,7 +202,7 @@ export default async function VehiclePage({ params }: Params) {
       </div>
 
       {similar.length > 0 && (
-        <section className="section section--light section--tight">
+        <section className="section section--tight" style={{ borderTop: "1px solid var(--line)" }}>
           <div className="wrap">
             <div className="head">
               <div>
@@ -211,7 +211,7 @@ export default async function VehiclePage({ params }: Params) {
               </div>
               <Link href="/collection" className="link">The full collection <Arrow /></Link>
             </div>
-            <div className="results">
+            <div className="lgrid" style={{ paddingBottom: 0 }}>
               {similar.map((s) => <VehicleCard key={s.slug} v={s} />)}
             </div>
           </div>

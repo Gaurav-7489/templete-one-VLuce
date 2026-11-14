@@ -10,7 +10,7 @@ import { VehicleCard } from "./VehicleCard";
 
 const fuels: Fuel[] = ["Petrol", "Diesel", "Hybrid", "Electric"];
 const transmissions: Transmission[] = ["Automatic", "Manual"];
-const kmBands = [10_000, 20_000, 30_000];
+const kmBands = [10_000, 20_000, 30_000, 50_000];
 const yearBands = [2023, 2022, 2021];
 
 export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; brands: string[] }) {
@@ -68,41 +68,84 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
 
   const ctx: OptCtx = { total: results.length, countWith, update };
 
+  const heading = filters.brand
+    ? `${filters.brand} Collection`
+    : filters.lifestyle
+      ? lifestyleTitle(filters.lifestyle)
+      : filters.fuel
+        ? `${filters.fuel} Cars`
+        : filters.q
+          ? `Results for “${filters.q}”`
+          : "All Collections";
+
   return (
-    <>
-      <div className="toolbar">
-        <div className="wrap toolbar__row">
-          <label className="search">
-            <span className="sr-only">Search the collection</span>
-            <Search />
-            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search — e.g. Porsche 911, electric, 2023" autoComplete="off" />
-          </label>
-          <div className="chips" aria-label="Active filters">
-            {active.map((a) => (
-              <button key={a.label} type="button" className="chip chip--remove" onClick={() => update(a.clear)} aria-label={`Remove filter ${a.label}`}>
-                {a.label}
-              </button>
-            ))}
+    <div className="theme-light">
+      <div className="wrap">
+        <div className="lhead">
+          <div>
+            <h1>{heading}</h1>
+            <p aria-live="polite">
+              {results.length === vehicles.length ? "Explore our complete luxury collection" : `${results.length} of ${vehicles.length} cars match your selection`}
+            </p>
           </div>
-          <button type="button" className="chip filters-toggle" onClick={() => setPanel(true)} aria-expanded={panel} aria-controls="filters">
-            Filters{active.length > 0 && ` · ${active.length}`}
-          </button>
-          <label className="select">
-            <span className="sr-only">Sort by</span>
-            <select value={filters.sort ?? "featured"} onChange={(e) => update({ sort: e.target.value as SortKey })}>
-              {sortOptions.map((s) => (
-                <option key={s.key} value={s.key}>{s.label}</option>
-              ))}
-            </select>
-          </label>
+          <div className="lhead__tools">
+            <button type="button" className="fbtn" onClick={() => setPanel(true)} aria-expanded={panel} aria-controls="filters">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" /><circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" /></svg>
+              Filter{active.length > 0 && <span className="fbtn__n">{active.length}</span>}
+            </button>
+            <label className="sortby">
+              <span>Sort by:</span>
+              <select value={filters.sort ?? "featured"} onChange={(e) => update({ sort: e.target.value as SortKey })} aria-label="Sort by">
+                {sortOptions.map((o) => (
+                  <option key={o.key} value={o.key}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+
+        {(active.length > 0 || filters.q) && (
+          <div className="lchips" aria-label="Active filters">
+            {filters.q && (
+              <button type="button" className="lchip" onClick={() => { setQ(""); update({ q: undefined }); }} aria-label={`Remove search ${filters.q}`}>“{filters.q}”</button>
+            )}
+            {active.map((a) => (
+              <button key={a.label} type="button" className="lchip" onClick={() => update(a.clear)} aria-label={`Remove filter ${a.label}`}>{a.label}</button>
+            ))}
+            <button type="button" className="lclear" onClick={clearAll}>Clear all</button>
+          </div>
+        )}
+
+        <div className="lgrid">
+          {results.length > 0 ? (
+            results.map((v, i) => <VehicleCard key={v.slug} v={v} priority={i < 3} />)
+          ) : (
+            <div className="lempty">
+              <h2>No cars match these filters — yet.</h2>
+              <p>Our collection changes every week. Clear a filter, or tell us what you are looking for and we will let you know when it arrives.</p>
+              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+                <button type="button" className="btn" onClick={clearAll}>Clear filters</button>
+                <a className="btn btn--ghost" href="/showroom#visit">Ask us to find it</a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="wrap collection">
-        <aside id="filters" className={`filters ${panel ? "filters--open" : ""}`} aria-label="Filters">
-          <button type="button" className="chip filters__close" onClick={() => setPanel(false)}>Close</button>
+      {panel && <div className="fdrawer-backdrop" onClick={() => setPanel(false)} aria-hidden="true" />}
+      <aside id="filters" className={`fdrawer ${panel ? "fdrawer--open" : ""}`} aria-label="Filters" aria-hidden={!panel} inert={!panel}>
+        <div className="fdrawer__head">
+          <span>Filter</span>
+          <button type="button" onClick={() => setPanel(false)} aria-label="Close filters">×</button>
+        </div>
+        <div className="fdrawer__body">
+          <label className="search">
+            <span className="sr-only">Search the collection</span>
+            <Search />
+            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search — e.g. Porsche 911, 2023" autoComplete="off" />
+          </label>
           <div className="filter-group">
-            <h3>Marque</h3>
+            <h3>Brand</h3>
             <div className="opt-list">
               {brands.map((b) => (
                 <Opt ctx={ctx} key={b} label={b} on={filters.brand === b} patch={{ brand: b }} off={{ brand: undefined }} />
@@ -110,18 +153,10 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
             </div>
           </div>
           <div className="filter-group">
-            <h3>Lifestyle</h3>
+            <h3>Category</h3>
             <div className="opt-list">
               {lifestyles.map((l) => (
                 <Opt ctx={ctx} key={l.key} label={l.title} on={filters.lifestyle === l.key} patch={{ lifestyle: l.key as Lifestyle }} off={{ lifestyle: undefined }} />
-              ))}
-            </div>
-          </div>
-          <div className="filter-group">
-            <h3>Fuel</h3>
-            <div className="opt-list">
-              {fuels.map((f) => (
-                <Opt ctx={ctx} key={f} label={f} on={filters.fuel === f} patch={{ fuel: f }} off={{ fuel: undefined }} />
               ))}
             </div>
           </div>
@@ -134,6 +169,14 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
             </div>
           </div>
           <div className="filter-group">
+            <h3>Fuel</h3>
+            <div className="opt-list">
+              {fuels.map((f) => (
+                <Opt ctx={ctx} key={f} label={f} on={filters.fuel === f} patch={{ fuel: f }} off={{ fuel: undefined }} />
+              ))}
+            </div>
+          </div>
+          <div className="filter-group">
             <h3>Transmission</h3>
             <div className="opt-list">
               {transmissions.map((t) => (
@@ -142,58 +185,30 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
             </div>
           </div>
           <div className="filter-group">
-            <h3>Model year</h3>
+            <h3>Year</h3>
             <div className="opt-list">
               {yearBands.map((y) => (
-                <Opt ctx={ctx} key={y} label={`${y} or newer`} on={filters.minYear === y} patch={{ minYear: y }} off={{ minYear: undefined }} />
+                <Opt ctx={ctx} key={y} label={`${y} & newer`} on={filters.minYear === y} patch={{ minYear: y }} off={{ minYear: undefined }} />
               ))}
             </div>
           </div>
           <div className="filter-group">
-            <h3>Kilometres</h3>
+            <h3>KM Driven</h3>
             <div className="opt-list">
               {kmBands.map((k) => (
-                <Opt ctx={ctx} key={k} label={`Under ${(k / 1000).toFixed(0)},000 km`} on={filters.maxKm === k} patch={{ maxKm: k }} off={{ maxKm: undefined }} />
+                <Opt ctx={ctx} key={k} label={`Under ${k.toLocaleString("en-IN")} km`} on={filters.maxKm === k} patch={{ maxKm: k }} off={{ maxKm: undefined }} />
               ))}
             </div>
           </div>
-          {active.length > 0 && (
-            <div className="filter-group">
-              <button type="button" className="link" onClick={clearAll}>Clear all filters</button>
-            </div>
-          )}
-          <button type="button" className="btn btn--block filters__apply" onClick={() => setPanel(false)}>
-            Show {results.length} {results.length === 1 ? "vehicle" : "vehicles"}
-          </button>
-        </aside>
-
-        <div>
-          <div className="results-head" aria-live="polite">
-            <span className="num">
-              {results.length} of {vehicles.length} vehicles
-              {filters.q && <> matching “{filters.q}”</>}
-            </span>
-          </div>
-          {results.length > 0 ? (
-            <div className="results">
-              {results.map((v, i) => (
-                <VehicleCard key={v.slug} v={v} priority={i < 3} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty">
-              <span className="eyebrow eyebrow--plain">No exact matches</span>
-              <h2 className="display h-md" style={{ marginTop: 16 }}>Nothing in the showroom <em>matches — yet.</em></h2>
-              <p>Our collection changes every week. Clear a filter, or tell us what you are looking for and we will let you know when it arrives.</p>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                <button type="button" className="btn" onClick={clearAll}>Clear filters</button>
-                <a className="btn btn--ghost" href="/showroom#visit">Ask us to find it</a>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
-    </>
+        <div className="fdrawer__foot">
+          <button type="button" className="btn btn--ghost" onClick={clearAll}>Clear</button>
+          <button type="button" className="btn" onClick={() => setPanel(false)}>
+            Show {results.length} {results.length === 1 ? "car" : "cars"}
+          </button>
+        </div>
+      </aside>
+    </div>
   );
 }
 
