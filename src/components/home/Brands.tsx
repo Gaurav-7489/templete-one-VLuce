@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "../BrandLogo";
 import { Arrow } from "../icons";
 import { Reveal } from "../Reveal";
 
@@ -26,12 +27,12 @@ export function BrandIndex({ brands }: { brands: { brand: string; count: number 
                   <span>Marque</span>
                   <span className="num">{String(count).padStart(2, "0")} {count === 1 ? "car" : "cars"}</span>
                 </span>
-                <span className="brand__name">{brand} <Arrow /></span>
+                <span className="brand__name"><BrandLogo brand={brand} className="brand__logo" /><span className="brand__label">{brand}</span> <Arrow /></span>
               </Link>
             ) : (
               <div key={brand} className="brand brand--empty" aria-label={`${brand}: no vehicles currently available`}>
                 <span className="brand__top"><span>Marque</span><span>Arriving soon</span></span>
-                <span className="brand__name">{brand}</span>
+                <span className="brand__name"><BrandLogo brand={brand} className="brand__logo" /><span className="brand__label">{brand}</span></span>
               </div>
             ),
           )}

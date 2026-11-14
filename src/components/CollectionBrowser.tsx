@@ -6,6 +6,7 @@ import { lifestyles, lifestyleTitle } from "@/data/catalog";
 import { applyFilters, filtersFromParams, filtersToParams, priceBands, sortOptions } from "@/lib/filters";
 import type { Fuel, InventoryFilters, Lifestyle, SortKey, Transmission, Vehicle } from "@/lib/types";
 import { Search } from "./icons";
+import { BrandLogo } from "./BrandLogo";
 import { BodyArt, Glyph } from "./Illustrations";
 import { VehicleCard } from "./VehicleCard";
 
@@ -147,9 +148,9 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
           </label>
           <div className="filter-group">
             <h3>Brand</h3>
-            <div className="opt-list">
+            <div className="vtiles vtiles--3">
               {brands.map((b) => (
-                <Opt ctx={ctx} key={b} label={b} on={filters.brand === b} patch={{ brand: b }} off={{ brand: undefined }} />
+                <VTile ctx={ctx} key={b} label={b} art={<BrandLogo brand={b} className="vtile__logo" />} on={filters.brand === b} patch={{ brand: b }} off={{ brand: undefined }} />
               ))}
             </div>
           </div>

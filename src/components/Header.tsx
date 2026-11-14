@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState, type FormEvent, type ReactNode }
 import { dealership } from "@/config/dealership";
 import { brandDirectory, lifestyles } from "@/data/catalog";
 import { priceBands } from "@/lib/filters";
+import { BrandLogo } from "./BrandLogo";
 import { BodyArt, Glyph } from "./Illustrations";
 import { Photo } from "./Photo";
 
@@ -36,7 +37,7 @@ const menu = [
   { href: "/shortlist", label: "Your Shortlist" },
 ];
 
-type Dropdown = { label: string; mega?: boolean; items: { label: string; href: string; note?: string; muted?: boolean; art?: string; glyph?: string }[] };
+type Dropdown = { label: string; mega?: boolean; items: { label: string; href: string; note?: string; muted?: boolean; art?: string; glyph?: string; logo?: boolean }[] };
 
 function dropdowns(stock: { brand: string; count: number }[]): Dropdown[] {
   const counts = new Map(stock.map((b) => [b.brand, b.count]));
@@ -44,7 +45,7 @@ function dropdowns(stock: { brand: string; count: number }[]): Dropdown[] {
   const year = new Date().getFullYear();
   return [
     { label: "Price", mega: true, items: priceBands.map((b) => ({ label: b.label, glyph: "price", href: `/collection?${new URLSearchParams({ ...(b.min != null && { minPrice: String(b.min) }), ...(b.max != null && { maxPrice: String(b.max) }) })}` })) },
-    { label: "Brand", mega: true, items: all.map((b) => ({ label: b, href: `/collection?brand=${encodeURIComponent(b)}`, note: counts.get(b) ? `${counts.get(b)} ${counts.get(b) === 1 ? "car" : "cars"}` : "Arriving soon", muted: !counts.get(b) })) },
+    { label: "Brand", mega: true, items: all.map((b) => ({ label: b, href: `/collection?brand=${encodeURIComponent(b)}`, note: counts.get(b) ? `${counts.get(b)} ${counts.get(b) === 1 ? "car" : "cars"}` : "Arriving soon", muted: !counts.get(b), logo: true })) },
     { label: "Category", mega: true, items: lifestyles.map((l) => ({ label: l.title, art: l.key, href: `/collection?lifestyle=${l.key}` })) },
     { label: "Fuel", mega: true, items: ["Petrol", "Diesel", "Hybrid", "Electric"].map((f) => ({ label: f, glyph: f, href: `/collection?fuel=${f}` })) },
     { label: "Year", mega: true, items: [year - 2, year - 3, year - 4, year - 5].map((y) => ({ label: `${y} & newer`, glyph: "year", href: `/collection?minYear=${y}` })) },
@@ -163,7 +164,7 @@ export function Header({ brands: stock }: { brands: { brand: string; count: numb
                           <Link href={i.href} className={`hmega__tile ${i.muted ? "hmega__tile--muted" : ""} ${i.art || i.glyph ? "hmega__tile--visual" : ""}`} onClick={() => setDrop(null)}>
                             {i.art && <BodyArt kind={i.art} className="hmega__art" />}
                             {i.glyph && <Glyph kind={i.glyph} className="hmega__glyph" />}
-                            <span className="hmega__name">{i.label}</span>
+                            {i.logo ? <BrandLogo brand={i.label} className="hmega__logo" /> : <span className="hmega__name">{i.label}</span>}
                             {i.note && <span className="hmega__note">{i.note}</span>}
                           </Link>
                         </li>
