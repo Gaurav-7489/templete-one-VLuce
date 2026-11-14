@@ -8,6 +8,9 @@ export function formatPrice(price: number | null): string {
   return `₹${price.toLocaleString("en-IN")}`;
 }
 
+/** Full Indian-grouped rupees for listing cards: ₹ 2,15,00,000. */
+export const formatPriceFull = (price: number | null) => (price == null ? "Price on request" : `₹ ${Math.round(price).toLocaleString("en-IN")}`);
+
 const trim = (n: number) => (Math.round(n * 100) / 100).toString();
 
 export const formatRupees = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;

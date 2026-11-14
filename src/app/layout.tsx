@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Instrument_Serif, Manrope } from "next/font/google";
+import { Outfit } from "next/font/google";
+import { Suspense } from "react";
 import { Attribution } from "@/components/Attribution";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -10,9 +11,8 @@ import { getBrands } from "@/lib/inventory";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const manrope = Manrope({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-manrope", display: "swap" });
-const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-inter", display: "swap" });
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["italic"], variable: "--font-serif-accent", display: "swap" });
+// Outfit: an open-licence geometric sans. One family, weights 200 to 600, carries the whole site.
+const sans = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500", "600"], variable: "--font-sans", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#090a0b", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#000000", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const brands = (await getBrands()).map((b) => b.brand).sort((a, b) => (brandOrder.indexOf(a) + 1 || 99) - (brandOrder.indexOf(b) + 1 || 99));
@@ -47,10 +47,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     sameAs: dealership.social.map((s) => s.href),
   };
   return (
-    <html lang="en-IN" className={`${manrope.variable} ${inter.variable} ${serif.variable}`}>
+    <html lang="en-IN" className={sans.variable}>
       <body>
         <a href="#main" className="skip-link">Skip to content</a>
-        <Header brands={brands} />
+        <Suspense fallback={<div className="header dark" style={{ height: 121, background: "#000" }} />}>
+          <Header brands={brands} />
+        </Suspense>
         <main id="main">{children}</main>
         <Footer brands={brands} />
         <WhatsAppFab />

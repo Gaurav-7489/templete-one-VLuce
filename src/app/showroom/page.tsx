@@ -14,16 +14,16 @@ export const metadata: Metadata = {
 export default function ShowroomPage() {
   return (
     <>
-      <section className="hero" style={{ height: "78svh", minHeight: 560 }}>
+      <section className="hero dark" style={{ height: "min(52svh, 520px)", minHeight: 360 }}>
         <div className="hero__media">
           <Photo src={dealership.showroom.image} alt={dealership.showroom.name} priority label={dealership.showroom.name} />
         </div>
         <div className="hero__content">
           <div className="wrap">
-            <span className="eyebrow fade-up">{dealership.showroom.name}</span>
+            <span className="eyebrow" style={{ color: "#fff" }}>{dealership.showroom.name}</span>
             <h1 className="display h-xl hero__title">
-              <span className="line"><span>Come and see</span></span>
-              <span className="line"><span><em>for yourself.</em></span></span>
+              <span className="line">Come and see</span>
+              <span className="line"><em>for yourself.</em></span>
             </h1>
           </div>
         </div>
@@ -39,7 +39,7 @@ export default function ShowroomPage() {
             <ShowroomInfo />
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <a href={directionsUrl()} target="_blank" rel="noopener" className="btn btn--dark">Get directions</a>
-              <a href={`tel:+${dealership.contact.phoneE164}`} className="btn btn--ghost-dark">Call the showroom</a>
+              <a href={`tel:+${dealership.contact.phoneE164}`} className="btn btn--ghost">Call the showroom</a>
             </div>
           </Reveal>
           <Reveal delay={0.1} image className="map">

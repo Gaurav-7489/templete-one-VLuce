@@ -13,16 +13,16 @@ export const metadata: Metadata = {
 export default function SellPage() {
   return (
     <>
-      <section className="hero" style={{ height: "78svh", minHeight: 560 }}>
+      <section className="hero dark" style={{ height: "min(52svh, 520px)", minHeight: 360 }}>
         <div className="hero__media">
           <Photo src={dealership.home.sellImage} alt="A luxury car parked in soft daylight" priority label="Sell your car" />
         </div>
         <div className="hero__content">
           <div className="wrap">
-            <span className="eyebrow fade-up">Sell or Exchange</span>
+            <span className="eyebrow" style={{ color: "#fff" }}>Sell or Exchange</span>
             <h1 className="display h-xl hero__title">
-              <span className="line"><span>Your next chapter</span></span>
-              <span className="line"><span><em>starts here.</em></span></span>
+              <span className="line">Your next chapter</span>
+              <span className="line"><em>starts here.</em></span>
             </h1>
           </div>
         </div>

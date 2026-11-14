@@ -5,7 +5,7 @@ import { dealership } from "@/config/dealership";
 import { formatPrice, vehicleTitle } from "@/lib/format";
 import type { Vehicle } from "@/lib/types";
 import { whatsappLink } from "@/lib/whatsapp";
-import { Arrow, WhatsApp } from "./icons";
+import { WhatsApp } from "./icons";
 import { useShortlist } from "./shortlist";
 import { VehicleCard } from "./VehicleCard";
 
@@ -15,10 +15,9 @@ export function ShortlistView({ vehicles }: { vehicles: Vehicle[] }) {
   if (!saved.length)
     return (
       <div className="empty">
-        <span className="eyebrow eyebrow--plain">Nothing saved yet</span>
-        <h2 className="display h-md" style={{ marginTop: 16 }}>Tap the heart on any car <em>to keep it here.</em></h2>
+        <h2>Nothing saved yet<span>Tap the heart on any car to keep it here</span></h2>
         <p>Your shortlist is stored only in this browser.</p>
-        <Link href="/collection" className="btn">Explore Collection <Arrow /></Link>
+        <Link href="/collection" className="btn">Explore All</Link>
       </div>
     );
   const text = `Hello ${dealership.name}, I'd like to view these cars:\n${saved.map((v) => `• ${vehicleTitle(v)} (${v.stockId}) — ${formatPrice(v.price)}`).join("\n")}`;
