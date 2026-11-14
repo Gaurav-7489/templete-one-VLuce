@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { BackToTop, DetailActions, ShareButton } from "@/components/DetailActions";
 import { DetailGallery } from "@/components/DetailGallery";
 import { WhatsApp } from "@/components/icons";
+import { Stagger } from "@/components/motion/Stagger";
 import { VehicleCard } from "@/components/VehicleCard";
 import { dealership } from "@/config/dealership";
 import { lifestyleTitle } from "@/data/catalog";
@@ -211,9 +212,9 @@ export default async function VehiclePage({ params }: Params) {
         <section className="related">
           <div className="wrap">
             <h2 className="lined lined--lg">Related Cars</h2>
-            <div className="lgrid" style={{ paddingBottom: 0 }}>
+            <Stagger className="lgrid lgrid--flush">
               {related.map((s) => <VehicleCard key={s.slug} v={s} />)}
-            </div>
+            </Stagger>
           </div>
         </section>
       )}

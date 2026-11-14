@@ -157,7 +157,7 @@ export function Header({ brands: stock }: { brands: { brand: string; count: numb
                   {d.label} <span className="hdrop__caret" aria-hidden="true" />
                 </button>
                 {drop === d.label && d.mega && (
-                  <div className="hmega">
+                  <div className="hmega" data-lenis-prevent>
                     <ul className={`hmega__grid ${d.items.some((i) => i.art || i.glyph) ? "hmega__grid--visual" : ""}`}>
                       {d.items.map((i) => (
                         <li key={i.label}>
@@ -173,7 +173,7 @@ export function Header({ brands: stock }: { brands: { brand: string; count: numb
                   </div>
                 )}
                 {drop === d.label && !d.mega && (
-                  <ul className="hdrop__menu">
+                  <ul className="hdrop__menu" data-lenis-prevent>
                     {d.items.map((i) => (
                       <li key={i.label}>
                         <Link href={i.href} onClick={() => setDrop(null)}>{i.label}</Link>
@@ -187,7 +187,7 @@ export function Header({ brands: stock }: { brands: { brand: string; count: numb
         </div>
       </header>
 
-      <div id="site-menu" className={`menu ${open ? "menu--open" : ""}`} role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden={!open} inert={!open}>
+      <div id="site-menu" data-lenis-prevent className={`menu ${open ? "menu--open" : ""}`} role="dialog" aria-modal="true" aria-label="Site menu" aria-hidden={!open} inert={!open}>
         <button ref={closeRef} type="button" className="menu__close" onClick={() => setOpen(false)}>
           Close <span aria-hidden="true" />
         </button>

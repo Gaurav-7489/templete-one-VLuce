@@ -18,6 +18,8 @@ const check = (ok, msg) => {
 async function page(viewport) {
   const ctx = await browser.newContext({ viewport });
   if (blockImages) await ctx.route(/images\.unsplash\.com/, (r) => r.abort());
+  // The opening curtain plays once per visit; skip it so checks start immediately.
+  await ctx.addInitScript(() => { try { sessionStorage.setItem("vluce:intro", "1"); } catch {} });
   const p = await ctx.newPage();
   p.on("pageerror", (e) => failures.push(`page error: ${e.message}`));
   p.on("console", (m) => m.type() === "error" && !/Failed to load resource|ERR_|net::/.test(m.text()) && failures.push(`console: ${m.text()}`));
@@ -46,7 +48,7 @@ await desk.waitForURL(/fuel=Electric/);
 check(/fuel=Electric/.test(desk.url()), "fuel filter updates URL");
 await desk.locator(".fdrawer .search input").fill("taycan");
 await desk.waitForURL(/q=taycan/);
-check((await desk.locator(".lgrid > article").count()) >= 1, "search narrows results");
+check((await desk.locator(".lgrid article").count()) >= 1, "search narrows results");
 await desk.locator(".fdrawer .search input").fill("zzzz");
 await desk.waitForSelector(".lempty");
 check(true, "empty state shown");
@@ -55,7 +57,7 @@ await desk.goto(base + "/", { waitUntil: "load" });
 await desk.fill("#hsearch", "defender");
 await desk.press("#hsearch", "Enter");
 await desk.waitForURL(/q=defender/);
-check((await desk.locator(".lgrid > article").count()) === 1, "header search finds the Defender");
+check((await desk.locator(".lgrid article").count()) === 1, "header search finds the Defender");
 await desk.getByRole("button", { name: /^Brand/ }).click();
 await desk.waitForSelector(".hmega");
 await desk.locator(".hmega a", { hasText: "Audi" }).click();
@@ -83,9 +85,9 @@ await desk.getByRole("button", { name: /Compare Car/ }).click();
 await desk.goto(base + "/compare", { waitUntil: "load" });
 check((await desk.locator(".cmp thead th").count()) === 3, "compare shows two cars side by side");
 await desk.goto(base + "/collection?brand=Volvo", { waitUntil: "load" });
-await desk.locator(".lgrid > article .save-btn").first().click();
+await desk.locator(".lgrid article .save-btn").first().click();
 await desk.goto(base + "/shortlist", { waitUntil: "load" });
-check((await desk.locator(".lgrid > article").count()) === 1, "shortlist persists");
+check((await desk.locator(".lgrid article").count()) === 1, "shortlist persists");
 
 // Sell flow
 await desk.goto(base + "/sell", { waitUntil: "load" });

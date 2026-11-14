@@ -20,7 +20,7 @@ export function Modal({ open, onClose, title, children }: { open: boolean; onClo
   if (!open) return null;
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal__box" ref={ref}>
+      <div className="modal__box" ref={ref} data-lenis-prevent>
         <div className="modal__head">
           <h2>{title}</h2>
           <button type="button" onClick={onClose} aria-label="Close">×</button>

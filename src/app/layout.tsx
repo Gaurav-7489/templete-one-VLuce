@@ -3,6 +3,9 @@ import { Inter, Instrument_Serif, Manrope } from "next/font/google";
 import { Attribution } from "@/components/Attribution";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { Intro } from "@/components/motion/Intro";
+import { ScrollProgress } from "@/components/motion/ScrollProgress";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
 import { dealership } from "@/config/dealership";
 import { brandOrder } from "@/data/catalog";
@@ -12,7 +15,7 @@ import "./globals.css";
 
 const manrope = Manrope({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-manrope", display: "swap" });
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-inter", display: "swap" });
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["italic"], variable: "--font-serif-accent", display: "swap" });
+const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif-accent", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#090a0b", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#0b1020", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const stock = (await getBrands()).sort((a, b) => (brandOrder.indexOf(a.brand) + 1 || 99) - (brandOrder.indexOf(b.brand) + 1 || 99));
@@ -50,12 +53,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en-IN" className={`${manrope.variable} ${inter.variable} ${serif.variable}`}>
       <body>
-        <a href="#main" className="skip-link">Skip to content</a>
-        <Header brands={stock} />
-        <main id="main">{children}</main>
-        <Footer brands={brands} />
-        <WhatsAppFab />
-        <Attribution />
+        <SmoothScroll>
+          <a href="#main" className="skip-link">Skip to content</a>
+          <ScrollProgress />
+          <Intro wordmark={dealership.wordmark} descriptor={dealership.descriptor} />
+          <Header brands={stock} />
+          <main id="main">{children}</main>
+          <Footer brands={brands} />
+          <WhatsAppFab />
+          <Attribution />
+        </SmoothScroll>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(org).replace(/</g, "\\u003c") }} />
       </body>
     </html>

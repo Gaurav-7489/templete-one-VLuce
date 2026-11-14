@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { whatsappLink } from "@/lib/whatsapp";
 import { Arrow, WhatsApp } from "../icons";
+import { Magnetic } from "../motion/Magnetic";
 import { Reveal } from "../Reveal";
 
 export function Closing() {
@@ -14,7 +15,7 @@ export function Closing() {
           </h2>
         </Reveal>
         <Reveal delay={0.15} className="cta-band__actions">
-          <Link href="/collection" className="btn">Explore Collection <Arrow /></Link>
+          <Magnetic><Link href="/collection" className="btn btn--gold">Explore Collection <Arrow /></Link></Magnetic>
           <a href={whatsappLink("Hello, I'm looking for a specific car. Can you help?")} target="_blank" rel="noopener" className="btn btn--ghost">
             <WhatsApp width={16} height={16} /> Find me a car
           </a>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Vehicle } from "@/lib/types";
 import { Arrow } from "../icons";
 import { Reveal } from "../Reveal";
+import { Stagger } from "../motion/Stagger";
 import { VehicleCard } from "../VehicleCard";
 
 export function CollectionPreview({ vehicles, total }: { vehicles: Vehicle[]; total: number }) {
@@ -20,13 +21,11 @@ export function CollectionPreview({ vehicles, total }: { vehicles: Vehicle[]; to
             <Link href="/collection" className="link">View all {total} vehicles <Arrow /></Link>
           </Reveal>
         </div>
-        <div className="lgrid" style={{ paddingBottom: 0 }}>
-          {vehicles.map((v, i) => (
-            <Reveal key={v.slug} delay={(i % 3) * 0.08}>
-              <VehicleCard v={v} />
-            </Reveal>
+        <Stagger className="lgrid lgrid--flush">
+          {vehicles.map((v) => (
+            <VehicleCard key={v.slug} v={v} />
           ))}
-        </div>
+        </Stagger>
       </div>
     </section>
   );

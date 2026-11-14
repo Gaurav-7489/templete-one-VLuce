@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { dealership } from "@/config/dealership";
 import { Arrow } from "../icons";
+import { Magnetic } from "../motion/Magnetic";
 import { Photo } from "../Photo";
 
 export function Hero({ count }: { count: number }) {
@@ -26,8 +27,8 @@ export function Hero({ count }: { count: number }) {
             </h1>
             <p className="lead fade-up" style={{ animationDelay: ".55s", marginTop: 28 }}>{h.heroLead}</p>
             <div className="hero__actions fade-up" style={{ animationDelay: ".7s" }}>
-              <Link href="/collection" className="btn">Explore Collection <Arrow /></Link>
-              <Link href="/showroom" className="btn btn--ghost">Visit Showroom</Link>
+              <Magnetic><Link href="/collection" className="btn btn--gold">Explore Collection <Arrow /></Link></Magnetic>
+              <Magnetic><Link href="/showroom" className="btn btn--ghost">Visit Showroom</Link></Magnetic>
             </div>
           </div>
           <div className="hero__aside fade-up" style={{ animationDelay: "1s" }}>

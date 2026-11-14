@@ -8,6 +8,7 @@ import type { Fuel, InventoryFilters, Lifestyle, SortKey, Transmission, Vehicle 
 import { Search } from "./icons";
 import { BrandLogo } from "./BrandLogo";
 import { BodyArt, Glyph } from "./Illustrations";
+import { Stagger } from "./motion/Stagger";
 import { VehicleCard } from "./VehicleCard";
 
 const fuels: Fuel[] = ["Petrol", "Diesel", "Hybrid", "Electric"];
@@ -118,10 +119,12 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
           </div>
         )}
 
-        <div className="lgrid">
-          {results.length > 0 ? (
-            results.map((v, i) => <VehicleCard key={v.slug} v={v} priority={i < 3} />)
-          ) : (
+        {results.length > 0 ? (
+          <Stagger key={JSON.stringify(filters)} className="lgrid">
+            {results.map((v, i) => <VehicleCard key={v.slug} v={v} priority={i < 3} />)}
+          </Stagger>
+        ) : (
+          <div className="lgrid">
             <div className="lempty">
               <h2>No cars match these filters — yet.</h2>
               <p>Our collection changes every week. Clear a filter, or tell us what you are looking for and we will let you know when it arrives.</p>
@@ -130,8 +133,8 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
                 <a className="btn btn--ghost" href="/showroom#visit">Ask us to find it</a>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {panel && <div className="fdrawer-backdrop" onClick={() => setPanel(false)} aria-hidden="true" />}
@@ -140,7 +143,7 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
           <span>Filter</span>
           <button type="button" onClick={() => setPanel(false)} aria-label="Close filters">×</button>
         </div>
-        <div className="fdrawer__body">
+        <div className="fdrawer__body" data-lenis-prevent>
           <label className="search">
             <span className="sr-only">Search the collection</span>
             <Search />

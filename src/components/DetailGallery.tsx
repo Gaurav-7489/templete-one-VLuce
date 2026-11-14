@@ -87,6 +87,7 @@ export function DetailGallery({ exterior, interior, title, fileBase }: { exterio
       {open != null && (
         <div
           className="lightbox"
+          data-lenis-prevent
           role="dialog"
           aria-modal="true"
           aria-label={`${title} photos`}
