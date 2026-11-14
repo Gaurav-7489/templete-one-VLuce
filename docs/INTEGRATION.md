@@ -26,6 +26,7 @@ How it works:
 ## Enquiries: `vandlabsDestination` in `src/lib/leads/destinations.ts`
 
 - Car enquiries go to `POST {VANDLABS_API_URL}/api/public/enquiry` with the workspace from the connection. They become leads with source **Website** on that car, in its branch, through Intelligence's normal follow-up rules and lead emails.
+- Each car enquiry carries the visitor's address (`X-Visitor-Address`, never sent to webhooks), so Intelligence limits each visitor to 6 per 10 minutes instead of limiting the whole website as one address.
 - Sell-your-car, visit and general enquiries go to `LEAD_WEBHOOK_URL` if set, otherwise demo mode (Intelligence has no endpoint for those yet).
 
 ## Same demo cars in both products
