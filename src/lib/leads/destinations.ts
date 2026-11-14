@@ -1,3 +1,4 @@
+import { getConnection, intelligenceUrl, websiteKey } from "../vandlabs/connection";
 import type { Lead, LeadDestination, LeadResult } from "./types";
 
 const ref = (prefix: string) => `${prefix}-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -81,17 +82,23 @@ export function vandlabsDestination(opts: { baseUrl: string; apiKey: string; ten
 }
 
 /** Destinations in priority order. The first that accepts a lead receives it. */
-export function leadDestinations(): LeadDestination[] {
-  const mode = process.env.LEAD_DESTINATION ?? "demo";
+export async function leadDestinations(): Promise<LeadDestination[]> {
+  const mode = process.env.LEAD_DESTINATION ?? "auto";
   const list: LeadDestination[] = [];
-  const { VANDLABS_API_URL: url, VANDLABS_API_KEY: key, VANDLABS_TENANT_ID: tenant, LEAD_WEBHOOK_URL: hook } = process.env;
-  if (mode === "vandlabs" && url && key && tenant) list.push(vandlabsDestination({ baseUrl: url, apiKey: key, tenantId: tenant }));
-  if ((mode === "webhook" || mode === "vandlabs") && hook) list.push(webhookDestination(hook));
+  const url = intelligenceUrl();
+  const key = websiteKey();
+  const hook = process.env.LEAD_WEBHOOK_URL;
+  // A connected website sends vehicle enquiries to Intelligence automatically; the workspace comes from the connection.
+  if (url && key && (mode === "vandlabs" || mode === "auto")) {
+    const tenant = process.env.VANDLABS_TENANT_ID || (await getConnection())?.tenantId;
+    if (tenant) list.push(vandlabsDestination({ baseUrl: url, apiKey: key, tenantId: tenant }));
+  }
+  if (mode !== "demo" && hook) list.push(webhookDestination(hook));
   list.push(demoDestination);
   return list;
 }
 
 export async function routeLead(lead: Lead): Promise<LeadResult> {
-  const target = leadDestinations().find((d) => d.accepts(lead))!;
+  const target = (await leadDestinations()).find((d) => d.accepts(lead))!;
   return target.send(lead);
 }

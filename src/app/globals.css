@@ -1905,6 +1905,7 @@ ol {
   gap: 8px;
 }
 .field label,
+.field > span,
 .field legend {
   font-size: 10px;
   font-weight: 600;
@@ -1943,11 +1944,11 @@ ol {
 .field--error input,
 .field--error select,
 .field--error textarea {
-  border-bottom-color: #d07a7a;
+  border-bottom-color: #b3261e;
 }
 .field__error {
   font-size: 12.5px;
-  color: #e09b9b;
+  color: #b3261e;
 }
 .section--light .field label,
 .section--light .field legend {
@@ -2050,7 +2051,7 @@ ol {
 .notice {
   padding: 28px;
   border: 1px solid var(--line);
-  background: rgba(201, 182, 140, 0.06);
+  background: #fff;
 }
 .notice h3 {
   margin: 0 0 8px;
@@ -2074,7 +2075,7 @@ ol {
 }
 .form-error {
   font-size: 13.5px;
-  color: #e09b9b;
+  color: #b3261e;
   margin: 0;
 }
 
