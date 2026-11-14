@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { dealership } from "@/config/dealership";
-import { availabilityLabel, formatKm, vehicleTitle } from "@/lib/format";
+import { availabilityLabel, formatKm, fullPrice, vehicleTitle } from "@/lib/format";
 import type { Vehicle } from "@/lib/types";
 import { telLink, whatsappLink } from "@/lib/whatsapp";
 import { Chevron, WhatsApp } from "./icons";
@@ -14,7 +14,6 @@ export function AvailabilityBadge({ v }: { v: Pick<Vehicle, "availability"> }) {
   return <span className={`badge badge--${v.availability}`}>{availabilityLabel[v.availability]}</span>;
 }
 
-export const fullPrice = (p: number | null) => (p == null ? "Price on request" : `₹ ${p.toLocaleString("en-IN")}`);
 
 const Ico = ({ d }: { d: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

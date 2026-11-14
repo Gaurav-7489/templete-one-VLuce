@@ -33,3 +33,15 @@ export const slugify = (s: string) =>
     .trim()
     .replace(/[\s_]+/g, "-")
     .replace(/-+/g, "-");
+
+/** Full rupee price as shown on listings: ₹ 1,72,00,000. */
+export const fullPrice = (p: number | null) => (p == null ? "Price on request" : `₹ ${p.toLocaleString("en-IN")}`);
+
+/** Standard reducing-balance EMI. Indicative only. */
+export function emi(principal: number, annualRatePct: number, months: number) {
+  if (principal <= 0 || months <= 0) return 0;
+  const r = annualRatePct / 12 / 100;
+  if (r === 0) return principal / months;
+  const f = Math.pow(1 + r, months);
+  return (principal * r * f) / (f - 1);
+}

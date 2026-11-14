@@ -25,7 +25,7 @@ async function page(viewport) {
 }
 
 const desk = await page({ width: 1440, height: 900 });
-for (const path of ["/", "/collection", "/collection/2022-porsche-911-carrera-s", "/sell", "/showroom", "/shortlist", "/nope"]) {
+for (const path of ["/", "/collection", "/collection/2022-porsche-911-carrera-s", "/sell", "/showroom", "/shortlist", "/compare", "/nope"]) {
   const res = await desk.goto(base + path, { waitUntil: "load" });
   check(path === "/nope" ? res.status() === 404 : res.status() === 200, `${path} → ${res.status()}`);
   const h1 = await desk.locator("h1").first().textContent();
@@ -62,21 +62,28 @@ await desk.locator(".hmega a", { hasText: "Audi" }).click();
 await desk.waitForURL(/brand=Audi/);
 check(true, "brand panel links to filtered collection");
 
-// Vehicle enquiry (validation, then success)
+// Vehicle page: reserve enquiry (validation, then success), compare, shortlist
 await desk.goto(base + "/collection/2022-porsche-911-carrera-s", { waitUntil: "load" });
-await desk.locator("#enq-name").fill("A");
-await desk.getByRole("button", { name: /Request a viewing/ }).click();
+await desk.getByRole("button", { name: /Reserve Your Car/ }).click();
+await desk.waitForSelector(".modal");
+await desk.locator("#reserve-name").fill("A");
+await desk.getByRole("button", { name: /Request reservation/ }).click();
 await desk.waitForSelector(".field__error");
 check(true, "enquiry validation errors shown");
-await desk.locator("#enq-name").fill("Asha Rao");
-await desk.locator("#enq-phone").fill("9876543210");
-await desk.locator(".check input[name=consent]").check();
-await desk.getByRole("button", { name: /Request a viewing/ }).click();
-await desk.waitForSelector(".notice");
-check(/DEMO-/.test(await desk.locator(".notice").textContent()), "vehicle enquiry accepted in demo mode");
-
-// Shortlist
-await desk.locator(".save-btn--inline").click();
+await desk.locator("#reserve-name").fill("Asha Rao");
+await desk.locator("#reserve-phone").fill("9876543210");
+await desk.locator(".modal input[name=consent]").check();
+await desk.getByRole("button", { name: /Request reservation/ }).click();
+await desk.waitForSelector(".modal .notice");
+check(/DEMO-/.test(await desk.locator(".modal .notice").textContent()), "reservation enquiry accepted in demo mode");
+await desk.keyboard.press("Escape");
+await desk.getByRole("button", { name: /Compare Car/ }).click();
+await desk.goto(base + "/collection/2022-range-rover-autobiography-lwb", { waitUntil: "load" });
+await desk.getByRole("button", { name: /Compare Car/ }).click();
+await desk.goto(base + "/compare", { waitUntil: "load" });
+check((await desk.locator(".cmp thead th").count()) === 3, "compare shows two cars side by side");
+await desk.goto(base + "/collection?brand=Volvo", { waitUntil: "load" });
+await desk.locator(".lgrid > article .save-btn").first().click();
 await desk.goto(base + "/shortlist", { waitUntil: "load" });
 check((await desk.locator(".lgrid > article").count()) === 1, "shortlist persists");
 

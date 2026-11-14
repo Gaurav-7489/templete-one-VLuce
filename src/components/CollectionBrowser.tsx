@@ -6,6 +6,7 @@ import { lifestyles, lifestyleTitle } from "@/data/catalog";
 import { applyFilters, filtersFromParams, filtersToParams, priceBands, sortOptions } from "@/lib/filters";
 import type { Fuel, InventoryFilters, Lifestyle, SortKey, Transmission, Vehicle } from "@/lib/types";
 import { Search } from "./icons";
+import { BodyArt, Glyph } from "./Illustrations";
 import { VehicleCard } from "./VehicleCard";
 
 const fuels: Fuel[] = ["Petrol", "Diesel", "Hybrid", "Electric"];
@@ -154,9 +155,9 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
           </div>
           <div className="filter-group">
             <h3>Category</h3>
-            <div className="opt-list">
+            <div className="vtiles">
               {lifestyles.map((l) => (
-                <Opt ctx={ctx} key={l.key} label={l.title} on={filters.lifestyle === l.key} patch={{ lifestyle: l.key as Lifestyle }} off={{ lifestyle: undefined }} />
+                <VTile ctx={ctx} key={l.key} label={l.title} art={<BodyArt kind={l.key} className="vtile__art" />} on={filters.lifestyle === l.key} patch={{ lifestyle: l.key as Lifestyle }} off={{ lifestyle: undefined }} />
               ))}
             </div>
           </div>
@@ -170,9 +171,9 @@ export function CollectionBrowser({ vehicles, brands }: { vehicles: Vehicle[]; b
           </div>
           <div className="filter-group">
             <h3>Fuel</h3>
-            <div className="opt-list">
+            <div className="vtiles vtiles--4">
               {fuels.map((f) => (
-                <Opt ctx={ctx} key={f} label={f} on={filters.fuel === f} patch={{ fuel: f }} off={{ fuel: undefined }} />
+                <VTile ctx={ctx} key={f} label={f} art={<Glyph kind={f} className="vtile__glyph" />} on={filters.fuel === f} patch={{ fuel: f }} off={{ fuel: undefined }} />
               ))}
             </div>
           </div>
@@ -220,6 +221,17 @@ function Opt({ label, on, patch, off, ctx }: { label: string; on: boolean; patch
     <button type="button" className="opt" aria-pressed={on} disabled={!on && n === 0} onClick={() => ctx.update(on ? off : patch)}>
       <span className="opt__label">{label}</span>
       <span className="opt__n num">{n}</span>
+    </button>
+  );
+}
+
+function VTile({ label, art, on, patch, off, ctx }: { label: string; art: React.ReactNode; on: boolean; patch: Partial<InventoryFilters>; off: Partial<InventoryFilters>; ctx: OptCtx }) {
+  const n = on ? ctx.total : ctx.countWith(patch);
+  return (
+    <button type="button" className="vtile" aria-pressed={on} disabled={!on && n === 0} onClick={() => ctx.update(on ? off : patch)}>
+      {art}
+      <span className="vtile__label">{label}</span>
+      <span className="vtile__n num">{n}</span>
     </button>
   );
 }

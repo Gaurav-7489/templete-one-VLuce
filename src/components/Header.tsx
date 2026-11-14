@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState, type FormEvent, type ReactNode }
 import { dealership } from "@/config/dealership";
 import { brandDirectory, lifestyles } from "@/data/catalog";
 import { priceBands } from "@/lib/filters";
+import { BodyArt, Glyph } from "./Illustrations";
 import { Photo } from "./Photo";
 
 /** Category tabs in the top bar. Each one is a saved view of the collection. */
@@ -35,19 +36,19 @@ const menu = [
   { href: "/shortlist", label: "Your Shortlist" },
 ];
 
-type Dropdown = { label: string; mega?: boolean; items: { label: string; href: string; note?: string; muted?: boolean }[] };
+type Dropdown = { label: string; mega?: boolean; items: { label: string; href: string; note?: string; muted?: boolean; art?: string; glyph?: string }[] };
 
 function dropdowns(stock: { brand: string; count: number }[]): Dropdown[] {
   const counts = new Map(stock.map((b) => [b.brand, b.count]));
   const all = [...new Set([...brandDirectory, ...stock.map((b) => b.brand)])].sort((a, b) => a.localeCompare(b));
   const year = new Date().getFullYear();
   return [
-    { label: "Price", items: priceBands.map((b) => ({ label: b.label, href: `/collection?${new URLSearchParams({ ...(b.min != null && { minPrice: String(b.min) }), ...(b.max != null && { maxPrice: String(b.max) }) })}` })) },
+    { label: "Price", mega: true, items: priceBands.map((b) => ({ label: b.label, glyph: "price", href: `/collection?${new URLSearchParams({ ...(b.min != null && { minPrice: String(b.min) }), ...(b.max != null && { maxPrice: String(b.max) }) })}` })) },
     { label: "Brand", mega: true, items: all.map((b) => ({ label: b, href: `/collection?brand=${encodeURIComponent(b)}`, note: counts.get(b) ? `${counts.get(b)} ${counts.get(b) === 1 ? "car" : "cars"}` : "Arriving soon", muted: !counts.get(b) })) },
-    { label: "Category", items: lifestyles.map((l) => ({ label: l.title, href: `/collection?lifestyle=${l.key}` })) },
-    { label: "Fuel", items: ["Petrol", "Diesel", "Hybrid", "Electric"].map((f) => ({ label: f, href: `/collection?fuel=${f}` })) },
-    { label: "Year", items: [year - 2, year - 3, year - 4, year - 5].map((y) => ({ label: `${y} & newer`, href: `/collection?minYear=${y}` })) },
-    { label: "KM Driven", items: [10_000, 20_000, 30_000, 50_000].map((k) => ({ label: `Under ${k.toLocaleString("en-IN")} km`, href: `/collection?maxKm=${k}` })) },
+    { label: "Category", mega: true, items: lifestyles.map((l) => ({ label: l.title, art: l.key, href: `/collection?lifestyle=${l.key}` })) },
+    { label: "Fuel", mega: true, items: ["Petrol", "Diesel", "Hybrid", "Electric"].map((f) => ({ label: f, glyph: f, href: `/collection?fuel=${f}` })) },
+    { label: "Year", mega: true, items: [year - 2, year - 3, year - 4, year - 5].map((y) => ({ label: `${y} & newer`, glyph: "year", href: `/collection?minYear=${y}` })) },
+    { label: "KM Driven", mega: true, items: [10_000, 20_000, 30_000, 50_000].map((k) => ({ label: `Under ${k.toLocaleString("en-IN")} km`, glyph: "km", href: `/collection?maxKm=${k}` })) },
   ];
 }
 
@@ -156,12 +157,14 @@ export function Header({ brands: stock }: { brands: { brand: string; count: numb
                 </button>
                 {drop === d.label && d.mega && (
                   <div className="hmega">
-                    <ul className="hmega__grid">
+                    <ul className={`hmega__grid ${d.items.some((i) => i.art || i.glyph) ? "hmega__grid--visual" : ""}`}>
                       {d.items.map((i) => (
                         <li key={i.label}>
-                          <Link href={i.href} className={i.muted ? "hmega__tile hmega__tile--muted" : "hmega__tile"} onClick={() => setDrop(null)}>
+                          <Link href={i.href} className={`hmega__tile ${i.muted ? "hmega__tile--muted" : ""} ${i.art || i.glyph ? "hmega__tile--visual" : ""}`} onClick={() => setDrop(null)}>
+                            {i.art && <BodyArt kind={i.art} className="hmega__art" />}
+                            {i.glyph && <Glyph kind={i.glyph} className="hmega__glyph" />}
                             <span className="hmega__name">{i.label}</span>
-                            <span className="hmega__note">{i.note}</span>
+                            {i.note && <span className="hmega__note">{i.note}</span>}
                           </Link>
                         </li>
                       ))}

@@ -39,6 +39,10 @@ export type Vehicle = {
   /** State of registration, e.g. "KA". Never the registration number. */
   registration?: string;
   images: string[];
+  /** Interior photos, shown under the Interior tab. Exterior photos are `images`. */
+  interiorImages?: string[];
+  /** Manufacturing year when it differs from the registration year. */
+  mfgYear?: number;
   highlights: string[];
   specs: VehicleSpecs;
   description: string;
