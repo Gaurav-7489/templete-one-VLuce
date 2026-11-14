@@ -5569,3 +5569,72 @@ button {
     display: none;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   Masonry car grids: free-flowing columns, photo-led cards
+   ══════════════════════════════════════════════════════════ */
+.lgrid {
+  display: block;
+  column-count: 3;
+  column-gap: clamp(22px, 2.4vw, 40px);
+}
+.lgrid > * {
+  display: block;
+  width: 100%;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  margin-bottom: clamp(22px, 2.4vw, 40px);
+}
+.lgrid > .lempty {
+  column-span: all;
+}
+@media (max-width: 1100px) {
+  .lgrid {
+    column-count: 2;
+  }
+}
+@media (max-width: 680px) {
+  .lgrid {
+    column-count: 1;
+  }
+}
+.lgrid--flush > :last-child {
+  margin-bottom: 0;
+}
+
+/* Let the photograph lead: tighter text, larger image. */
+.lcard__head {
+  padding: 24px 28px 20px;
+  padding-right: 72px;
+}
+.lcard__title {
+  font-size: clamp(24px, 1.9vw, 30px);
+  margin-top: 12px;
+}
+.lcard__price {
+  margin-top: 8px;
+}
+.lcard__media {
+  aspect-ratio: 4 / 5;
+}
+.lcard__specs {
+  padding: 18px 24px 22px;
+}
+.lcard__specs li {
+  font-size: 13.5px;
+}
+.lcard__save {
+  top: 18px !important;
+  right: 20px !important;
+}
+.lcard__count {
+  left: 18px;
+  bottom: 18px;
+}
+.lcard__acts {
+  right: 16px;
+  bottom: 16px;
+}
+.lcard:hover {
+  transform: translateY(-4px);
+}

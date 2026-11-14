@@ -27,7 +27,11 @@ const icons = {
   phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z",
 };
 
-/** Listing card: registration year, title and price on top; photo carousel with quick contact; key specs below. */
+/** Photo shapes for the free-flowing masonry grid. Each car keeps the same shape everywhere it appears. */
+const shapes = ["4 / 5", "1 / 1", "5 / 4", "3 / 4", "4 / 3", "4 / 5", "1 / 1", "2 / 3"];
+const shapeFor = (slug: string) => shapes[[...slug].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % shapes.length];
+
+/** Listing card: registration year, title and price on top; large photo carousel with quick contact; key specs below. */
 export function VehicleCard({ v, priority }: { v: Vehicle; priority?: boolean }) {
   const [i, setI] = useState(0);
   const imgs = v.images.length ? v.images : [""];
@@ -47,7 +51,7 @@ export function VehicleCard({ v, priority }: { v: Vehicle; priority?: boolean })
         </h3>
         <div className="lcard__price num">{fullPrice(v.price)}</div>
       </div>
-      <div className="lcard__media">
+      <div className="lcard__media" style={{ aspectRatio: shapeFor(v.slug) }}>
         {imgs.map((src, k) => (
           <div key={k} className="lcard__slide" style={{ opacity: k === i ? 1 : 0 }} aria-hidden={k !== i}>
             {(k === i || k === (i + 1) % n || k === (i - 1 + n) % n) && <Photo src={src || undefined} alt={k === i ? vehicleTitle(v) : ""} label={`${v.brand} ${v.model}`} priority={priority && k === 0} />}
