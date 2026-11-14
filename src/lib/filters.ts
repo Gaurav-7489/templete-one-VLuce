@@ -2,8 +2,8 @@ import type { InventoryFilters, SortKey, Vehicle } from "./types";
 
 export const sortOptions: { key: SortKey; label: string }[] = [
   { key: "featured", label: "Recommended" },
-  { key: "price-desc", label: "Price — high to low" },
-  { key: "price-asc", label: "Price — low to high" },
+  { key: "price-desc", label: "Price: high to low" },
+  { key: "price-asc", label: "Price: low to high" },
   { key: "year-desc", label: "Newest first" },
   { key: "km-asc", label: "Lowest kilometres" },
 ];
@@ -58,6 +58,9 @@ export const priceBands = [
   { label: "₹1 Cr – ₹2 Cr", min: 1_00_00_000, max: 2_00_00_000 },
   { label: "Above ₹2 Cr", min: 2_00_00_000, max: undefined },
 ];
+
+export const kmBands = [10_000, 20_000, 30_000];
+export const yearBands = [2023, 2022, 2021];
 
 export function filtersFromParams(p: URLSearchParams): InventoryFilters {
   const num = (k: string) => {

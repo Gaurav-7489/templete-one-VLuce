@@ -1,5 +1,5 @@
 import { slugify } from "../format";
-import type { Availability, Fuel, Lifestyle, Transmission, Vehicle } from "../types";
+import type { Availability, Fuel, Lifestyle, Transmission, Vehicle, VehicleSpecs } from "../types";
 import type { InventorySource } from "./source";
 
 /**
@@ -14,8 +14,8 @@ import type { InventorySource } from "./source";
  * The key is read on the server only and is never sent to the browser. Only published vehicles
  * that are available or reserved are listed. Costs and margins are not exposed by that API.
  *
- * The Business API does not return body type, colours, specifications or marketing copy, so
- * those fields are left empty or inferred; see docs/INTEGRATION.md.
+ * Body type, colours, description, highlights, categories and headline specifications are used when
+ * Intelligence has them recorded; otherwise those sections are hidden. See docs/INTEGRATION.md.
  */
 
 type ApiVehicle = {
@@ -32,7 +32,19 @@ type ApiVehicle = {
   availability?: string;
   published?: boolean;
   photos?: string[];
+  bodyType?: string;
+  exteriorColor?: string;
+  interiorColor?: string;
+  description?: string;
+  features?: string[];
+  categories?: string[];
+  registrationState?: string;
+  featured?: boolean;
+  specifications?: Record<string, string>;
 };
+
+const LIFESTYLES: Lifestyle[] = ["luxury-sedans", "suvs", "performance", "sports", "electric", "premium-hatchbacks"];
+const SPEC_KEYS = ["engine", "power", "torque", "acceleration", "topSpeed", "drivetrain", "seats", "range", "battery"] as const;
 
 const fuelMap: Record<string, Fuel> = { petrol: "Petrol", diesel: "Diesel", hybrid: "Hybrid", electric: "Electric", ev: "Electric", cng: "Petrol" };
 const availMap: Record<string, Availability> = { available: "available", reserved: "reserved", sold: "sold" };
@@ -43,7 +55,9 @@ export function mapApiVehicle(a: ApiVehicle, city: string): Vehicle | null {
   if (availability !== "available" && availability !== "reserved") return null;
   const fuel = fuelMap[String(a.fuel ?? "").toLowerCase()] ?? "Petrol";
   const transmission: Transmission = /man/i.test(String(a.transmission ?? "")) ? "Manual" : "Automatic";
-  const lifestyle: Lifestyle[] = fuel === "Electric" ? ["electric"] : [];
+  const tagged = (a.categories ?? []).filter((c): c is Lifestyle => (LIFESTYLES as string[]).includes(c));
+  const lifestyle: Lifestyle[] = tagged.length ? tagged : fuel === "Electric" ? ["electric"] : [];
+  const specs: VehicleSpecs = Object.fromEntries(SPEC_KEYS.filter((k) => typeof a.specifications?.[k] === "string").map((k) => [k, a.specifications![k]]));
   const brand = a.make ?? "";
   const model = a.model ?? "";
   const variant = a.variant ?? "";
@@ -60,16 +74,18 @@ export function mapApiVehicle(a: ApiVehicle, city: string): Vehicle | null {
     transmission,
     km: Number(a.odometerKm) || 0,
     owners: Number(a.owners) || 1,
-    bodyType: "",
+    bodyType: a.bodyType ?? "",
     lifestyle,
     availability,
-    exterior: "",
-    interior: "",
+    exterior: a.exteriorColor ?? "",
+    interior: a.interiorColor ?? "",
+    registration: a.registrationState || undefined,
     city,
     images: Array.isArray(a.photos) ? a.photos.filter((p) => typeof p === "string" && /^https:\/\//.test(p)) : [],
-    highlights: [],
-    specs: {},
-    description: "",
+    highlights: Array.isArray(a.features) ? a.features.filter((f) => typeof f === "string").slice(0, 12) : [],
+    specs,
+    description: a.description ?? "",
+    featured: a.featured === true,
   };
 }
 

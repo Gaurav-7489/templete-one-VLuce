@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { EmiCalculator } from "@/components/EmiCalculator";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { Gallery } from "@/components/Gallery";
-import { Arrow, WhatsApp } from "@/components/icons";
+import { WhatsApp } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
 import { SaveButton } from "@/components/SaveButton";
 import { AvailabilityBadge, VehicleCard } from "@/components/VehicleCard";
@@ -124,7 +124,7 @@ export default async function VehiclePage({ params }: Params) {
             <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
               <AvailabilityBadge v={v} />
               {v.lifestyle.map((l) => (
-                <Link key={l} href={`/collection?lifestyle=${l}`} className="chip" style={{ height: 26 }}>{lifestyleTitle(l)}</Link>
+                <Link key={l} href={`/collection?lifestyle=${l}`} className="badge badge--light">{lifestyleTitle(l)}</Link>
               ))}
             </div>
             <h1 className="display h-xl vd__title">
@@ -202,14 +202,11 @@ export default async function VehiclePage({ params }: Params) {
       </div>
 
       {similar.length > 0 && (
-        <section className="section section--light section--tight">
+        <section className="section section--tight">
           <div className="wrap">
             <div className="head">
-              <div>
-                <span className="eyebrow">You may also consider</span>
-                <h2 className="display h-lg head__title">Similar <em>automobiles.</em></h2>
-              </div>
-              <Link href="/collection" className="link">The full collection <Arrow /></Link>
+              <h2 className="duo">You May Also Like <b>Similar Cars</b></h2>
+              <Link href="/collection" className="btn btn--sm">Explore All</Link>
             </div>
             <div className="results">
               {similar.map((s) => <VehicleCard key={s.slug} v={s} />)}
@@ -218,7 +215,7 @@ export default async function VehiclePage({ params }: Params) {
         </section>
       )}
 
-      <div className="mobile-bar">
+      <div className="mobile-bar dark">
         <a className="btn" href={whatsappLink(waText)} target="_blank" rel="noopener"><WhatsApp width={16} height={16} /> WhatsApp</a>
         <a className="btn btn--ghost" href="#enquire">Enquire</a>
       </div>

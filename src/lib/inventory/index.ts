@@ -1,24 +1,28 @@
 import { cache } from "react";
 import { dealership } from "@/config/dealership";
 import type { Vehicle } from "../types";
+import { getConnection, intelligenceUrl, websiteKey } from "../vandlabs/connection";
 import { demoSource } from "./demo";
 import type { InventorySource } from "./source";
 import { vandlabsSource } from "./vandlabs";
 
-/** Picks the inventory source from the environment. The website works with no configuration at all. */
-export function inventorySource(): InventorySource {
-  if (process.env.INVENTORY_SOURCE === "vandlabs") {
-    const baseUrl = process.env.VANDLABS_API_URL;
-    const apiKey = process.env.VANDLABS_API_KEY;
-    if (baseUrl && apiKey) {
-      return vandlabsSource({ baseUrl, apiKey, city: dealership.showroom.city, revalidate: Number(process.env.VANDLABS_REVALIDATE_SECONDS) || 300 });
-    }
-    console.warn("INVENTORY_SOURCE=vandlabs but VANDLABS_API_URL or VANDLABS_API_KEY is missing; using demo inventory.");
+/**
+ * Picks the inventory source. With no configuration the site shows its demo collection. Once the website is
+ * connected to Intelligence (from /connect, or INVENTORY_SOURCE=vandlabs with a key), it shows that workspace's
+ * published stock instead, and demo cars are never mixed in.
+ */
+export async function inventorySource(): Promise<InventorySource> {
+  if (process.env.INVENTORY_SOURCE === "demo") return demoSource;
+  const baseUrl = intelligenceUrl();
+  const apiKey = websiteKey();
+  if (baseUrl && apiKey && (process.env.INVENTORY_SOURCE === "vandlabs" || (await getConnection()))) {
+    return vandlabsSource({ baseUrl, apiKey, city: dealership.showroom.city, revalidate: Number(process.env.VANDLABS_REVALIDATE_SECONDS) || 300 });
   }
+  if (process.env.INVENTORY_SOURCE === "vandlabs") console.warn("INVENTORY_SOURCE=vandlabs but VANDLABS_API_URL or a key is missing; using demo inventory.");
   return demoSource;
 }
 
-export const getInventory = cache(async (): Promise<Vehicle[]> => inventorySource().list());
+export const getInventory = cache(async (): Promise<Vehicle[]> => (await inventorySource()).list());
 
 export async function getVehicle(slug: string): Promise<Vehicle | undefined> {
   return (await getInventory()).find((v) => v.slug === slug);

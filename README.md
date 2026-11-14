@@ -1,6 +1,6 @@
 # VLuce — Template 01
 
-A premium automotive dealership website template by **VandLabs Studio**. It's a luxury-showroom experience made for one dealership's own brand, and it runs on its own with no back office.
+A dealership website template by **VandLabs Studio**: a light showroom layout with a black header, a category tab bar, an "Explore By" filter bar (price, brand, category, fuel, year, kilometres), search, and white car cards with "Request A Call Back" and WhatsApp. It runs on its own, or connects to VandLabs Automotive Intelligence by signing in.
 
 > Luxury showroom on the outside. Powerful dealership intelligence on the inside — as a separate, optional product.
 
@@ -9,11 +9,12 @@ A premium automotive dealership website template by **VandLabs Studio**. It's a 
 | Page | Purpose |
 |---|---|
 | `/` | Cinematic hero, collection showcase, brand index, featured car, lifestyle categories, sell-your-car, dealership experience, showroom, closing CTA |
-| `/collection` | Search, filters (marque, lifestyle, fuel, price, transmission, year, kilometres) with live counts, sorting, shareable URLs, empty state, mobile filter drawer |
+| `/collection` | Collection and search results (`/collection?q=…`): breadcrumb, "Search By" title, sorting, removable filter chips, shareable URLs, and a "No results found" state that suggests top choices |
 | `/collection/[slug]` | Gallery with fullscreen lightbox (keyboard + swipe), key facts, highlights, specs, details, EMI estimate, enquiry form with intents, WhatsApp/call, similar cars, `Car` JSON-LD |
 | `/sell` | Three-step selling enquiry |
 | `/showroom` | Address, hours, map, directions, appointment request |
 | `/shortlist` | Saved cars (stored only in the browser), sent to the showroom over WhatsApp |
+| `/connect` | Private: the dealership owner signs in with their Intelligence email to connect stock and enquiries |
 
 It also has a fullscreen menu, a WhatsApp button, UTM/referrer attribution on every enquiry, `AutoDealer` structured data, a sitemap, robots.txt, reduced-motion support, keyboard focus states and a designed fallback for missing photos.
 
@@ -39,7 +40,7 @@ BASE_URL=http://localhost:3000 npm run smoke   # end-to-end checks (needs Playwr
 
 ## Stack
 
-Next.js 15 (App Router, static generation + ISR), React 19, TypeScript, and hand-written CSS with design tokens. Fonts are Manrope, Inter and Instrument Serif via `next/font`. There's no UI framework and no paid service.
+Next.js 15 (App Router, static generation + ISR), React 19, TypeScript, and hand-written CSS with design tokens. The font is Outfit (open licence) via `next/font`. There's no UI framework and no paid service.
 
 ## Documentation
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ShortlistView } from "@/components/ShortlistView";
 import { getInventory } from "@/lib/inventory";
 
@@ -10,12 +11,15 @@ export default async function ShortlistPage() {
   return (
     <>
       <section className="page-hero">
-        <div className="wrap page-hero__row">
-          <div>
-            <span className="eyebrow">Your Shortlist</span>
-            <h1 className="display h-xl" style={{ marginTop: 22 }}>Cars you <em>are considering.</em></h1>
+        <div className="wrap">
+          <div className="page-hero__row">
+            <ol className="crumbs" aria-label="Breadcrumb">
+              <li><Link href="/">Home</Link></li>
+              <li aria-current="page">Shortlist</li>
+            </ol>
+            <h1 className="display h-xl">Your <em>Shortlist</em></h1>
+            <p className="lead">Saved on this device. Share it with us on WhatsApp, and we will prepare them for a viewing.</p>
           </div>
-          <p className="lead">Saved on this device. Share it with us on WhatsApp, and we will prepare them for a viewing.</p>
         </div>
       </section>
       <section className="section section--tight">

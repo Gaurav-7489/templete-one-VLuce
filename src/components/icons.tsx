@@ -43,3 +43,38 @@ export const CarLine = (p: P) => (
     <path d="M96 62c26-18 52-26 84-27 34-1 62 6 84 26" opacity=".6" />
   </svg>
 );
+
+const line = { fill: "none", stroke: "currentColor", strokeWidth: 1.4, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+
+export const MenuIcon = (p: P) => (
+  <svg viewBox="0 0 24 24" {...line} strokeWidth={2} aria-hidden="true" {...p}><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+);
+export const Phone = (p: P) => (
+  <svg viewBox="0 0 24 24" {...line} aria-hidden="true" {...p}><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z" /><path d="M15 4a5 5 0 0 1 5 5M15 7.5a1.5 1.5 0 0 1 1.5 1.5" /></svg>
+);
+export const ArrowUpRight = (p: P) => (
+  <svg viewBox="0 0 24 24" width="18" height="18" {...line} aria-hidden="true" {...p}><path d="M7 17 17 7M9 7h8v8" /></svg>
+);
+export const Odometer = (p: P) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...p}><path d="M20 4 4 11l7 2 2 7 7-16Z" /></svg>
+);
+export const FuelPump = (p: P) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...p}><path d="M5 4h9v16H5V4Zm2 2v5h5V6H7Zm9 2 3 3v7a1.5 1.5 0 0 1-3 0v-4h-1v-2h2.5v6h.5v-6.2L15.4 9.4 16 8Z" /></svg>
+);
+export const Plate = (p: P) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...p}><path d="M6 4h12v16l-6-3-6 3V4Zm3 3v2h6V7H9Z" /></svg>
+);
+
+/** Small round glyphs for the header category tabs. Generic shapes, not any brand's marks. */
+export const TabIcon = ({ name, ...p }: P & { name: string }) => {
+  const d: Record<string, React.ReactNode> = {
+    all: <><circle cx="12" cy="12" r="9" /><path d="M8 8h3v3H8zM13 8h3v3h-3zM8 13h3v3H8zM13 13h3v3h-3z" /></>,
+    "luxury-sedans": <><circle cx="12" cy="12" r="9" /><path d="M6.5 13.5 8 10h8l1.5 3.5M6.5 13.5h11v2h-11z" /></>,
+    suvs: <><circle cx="12" cy="12" r="9" /><path d="M6.5 15v-3.5l2-2.5h6l3 2.5V15zM9 15v1M15 15v1" /></>,
+    performance: <><circle cx="12" cy="12" r="9" /><path d="M12 12 16 8M7.5 14.5a5 5 0 0 1 9 0" /></>,
+    sports: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="2.5" /><path d="M12 3v6.5M4 15l5.7-2M20 15l-5.7-2" /></>,
+    electric: <><circle cx="12" cy="12" r="9" /><path d="M13 6.5 9 13h3l-1 4.5 4-6.5h-3z" /></>,
+    "premium-hatchbacks": <><circle cx="12" cy="12" r="9" /><path d="M7 14.5v-2l2.5-3H14l3 3v2zM9.5 14.5v1M14.5 14.5v1" /></>,
+  };
+  return <svg viewBox="0 0 24 24" {...line} strokeWidth={1.2} aria-hidden="true" {...p}>{d[name] ?? d.all}</svg>;
+};
