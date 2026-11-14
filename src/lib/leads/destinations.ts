@@ -1,5 +1,5 @@
 import { getConnection, intelligenceUrl, websiteKey } from "../vandlabs/connection";
-import type { Lead, LeadDestination, LeadResult } from "./types";
+import type { Lead, LeadContext, LeadDestination, LeadResult } from "./types";
 
 const ref = (prefix: string) => `${prefix}-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -56,10 +56,12 @@ export function vandlabsDestination(opts: { baseUrl: string; apiKey: string; ten
   return {
     id: "vandlabs",
     accepts: (lead) => lead.kind === "vehicle" && !!lead.stockId,
-    async send(lead): Promise<LeadResult> {
+    async send(lead, context?: LeadContext): Promise<LeadResult> {
+      // Intelligence limits enquiries per visitor; without this every visitor would share this server's address.
+      const visitor = context?.visitorAddress && /^[0-9A-Fa-f:.]{2,45}$/.test(context.visitorAddress) ? { "X-Visitor-Address": context.visitorAddress } : ({} as Record<string, string>);
       const res = await fetch(new URL("/api/public/enquiry", opts.baseUrl), {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${opts.apiKey}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${opts.apiKey}`, ...visitor },
         body: JSON.stringify({
           tenant: opts.tenantId,
           stock: lead.stockId,
@@ -98,7 +100,7 @@ export async function leadDestinations(): Promise<LeadDestination[]> {
   return list;
 }
 
-export async function routeLead(lead: Lead): Promise<LeadResult> {
+export async function routeLead(lead: Lead, context: LeadContext = {}): Promise<LeadResult> {
   const target = (await leadDestinations()).find((d) => d.accepts(lead))!;
-  return target.send(lead);
+  return target.send(lead, context);
 }

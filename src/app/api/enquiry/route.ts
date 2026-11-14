@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
   if (limited(ip)) return problem(429, "Too many enquiries from this device. Please call or WhatsApp us.");
   try {
-    const result = await routeLead(lead);
+    const result = await routeLead(lead, { visitorAddress: ip === "local" ? undefined : ip });
     if (!result.ok) return problem(result.status, result.message, result.fields);
     return NextResponse.json({ ok: true, reference: result.reference, demo: result.demo ?? false }, { status: 201 });
   } catch (error) {

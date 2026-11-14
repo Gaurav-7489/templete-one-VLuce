@@ -31,5 +31,11 @@ export interface LeadDestination {
   readonly id: string;
   /** Whether this destination accepts this kind of lead. */
   accepts(lead: Lead): boolean;
-  send(lead: Lead): Promise<LeadResult>;
+  send(lead: Lead, context?: LeadContext): Promise<LeadResult>;
 }
+
+/** Request details a destination may need but which are not part of the enquiry itself, and are never forwarded to webhooks. */
+export type LeadContext = {
+  /** The visitor's address, so Intelligence can rate-limit per visitor rather than per website server. */
+  visitorAddress?: string;
+};
