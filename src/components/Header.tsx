@@ -130,15 +130,15 @@ export function Header({ brands: stock }: { brands: { brand: string; count: numb
     <>
       <header className="hdr">
         <div className="hdr__top">
-          <Link href="/" className="wordmark hdr__logo" aria-label={`${dealership.name} — home`}>
-            <span className="wordmark__name">{dealership.wordmark}</span>
-            <span className="wordmark__desc">{dealership.descriptor}</span>
-          </Link>
           <nav className="hdr__tabs" aria-label="Collections">
             <Suspense fallback={null}>
               <TabLinks />
             </Suspense>
           </nav>
+          <Link href="/" className="wordmark hdr__logo" aria-label={`${dealership.name} — home`}>
+            <span className="wordmark__name">{dealership.wordmark}</span>
+            <span className="wordmark__desc">{dealership.descriptor}</span>
+          </Link>
           <div className="hdr__right">
             <Suspense fallback={<div className="hsearch" />}>
               <HeaderSearch />

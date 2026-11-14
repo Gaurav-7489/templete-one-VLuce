@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Instrument_Serif, Manrope } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import { Attribution } from "@/components/Attribution";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -13,7 +13,6 @@ import { getBrands } from "@/lib/inventory";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const manrope = Manrope({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-manrope", display: "swap" });
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-inter", display: "swap" });
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif-accent", display: "swap" });
 
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#0b1020", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#000000", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const stock = (await getBrands()).sort((a, b) => (brandOrder.indexOf(a.brand) + 1 || 99) - (brandOrder.indexOf(b.brand) + 1 || 99));
@@ -51,7 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     sameAs: dealership.social.map((s) => s.href),
   };
   return (
-    <html lang="en-IN" className={`${manrope.variable} ${inter.variable} ${serif.variable}`}>
+    <html lang="en-IN" className={`${inter.variable} ${serif.variable}`}>
       <body>
         <SmoothScroll>
           <a href="#main" className="skip-link">Skip to content</a>
