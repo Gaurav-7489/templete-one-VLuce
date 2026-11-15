@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { dealership } from "@/config/dealership";
 import { brandOrder } from "@/data/catalog";
 import { Arrow } from "./icons";
-import { postEnquiry, Received, type SubmitState } from "./EnquiryForm";
+import { postEnquiry, Received, useSubmissionKey, type SubmitState } from "./EnquiryForm";
 
 const years = Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i);
 const steps = ["Your car", "Its history", "Your details"];
@@ -14,6 +14,7 @@ export function SellForm() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Record<string, string>>({});
   const [state, setState] = useState<SubmitState>({ status: "idle" });
+  const [key, renewKey] = useSubmissionKey();
   const [local, setLocal] = useState<Record<string, string>>({});
   const f = { ...local, ...(state.fields ?? {}) };
   const set = (k: string) => (e: { target: { value: string } }) => setData((d) => ({ ...d, [k]: e.target.value }));
@@ -48,7 +49,8 @@ export function SellForm() {
       consent: d.get("consent") === "on",
       marketing: false,
       website: d.get("website"),
-    });
+    }, key);
+    if (result.status === "done") renewKey();
     if (result.status === "error" && result.fields && Object.keys(result.fields).some((k) => k.startsWith("sell."))) {
       setStep(Object.keys(result.fields).some((k) => k === "sell.km") ? 1 : 0);
     }

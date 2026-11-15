@@ -31,6 +31,8 @@ export function validateLead(raw: Record<string, unknown>): { lead: Lead | null;
     consent: true,
     marketing: raw.marketing === true,
     page: clean(raw.page, 200) || undefined,
+    referrer: /^[a-z0-9.-]{1,80}$/.test(clean(raw.referrer, 80).toLowerCase()) ? clean(raw.referrer, 80).toLowerCase() : undefined,
+    idempotencyKey: /^[A-Za-z0-9_-]{16,64}$/.test(clean(raw.idempotencyKey, 64)) ? clean(raw.idempotencyKey, 64) : undefined,
     utm: {
       source: clean(raw.utmSource, 40).toLowerCase() || undefined,
       medium: clean(raw.utmMedium, 40).toLowerCase() || undefined,
@@ -71,7 +73,11 @@ export function validateLead(raw: Record<string, unknown>): { lead: Lead | null;
     const v = (raw.visit ?? {}) as Record<string, unknown>;
     const date = clean(v.date, 10);
     if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) fields["visit.date"] = "Please choose a date.";
-    lead.visit = { date: date || undefined, time: clean(v.time, 20) || undefined };
+    const today = new Date(Date.now() + 330 * 60_000).toISOString().slice(0, 10);
+    if (date && /^\d{4}-\d{2}-\d{2}$/.test(date) && date < today) fields["visit.date"] = "Please choose today or a later date.";
+    const time = clean(v.time, 20);
+    if (time && !/^(Morning|Afternoon|Evening|\d{2}:\d{2})$/.test(time)) fields["visit.time"] = "Please choose a time.";
+    lead.visit = { date: date || undefined, time: time || undefined };
   }
   if (Object.keys(fields).length) return { lead: null, fields };
   return { lead: lead as Lead, fields };
