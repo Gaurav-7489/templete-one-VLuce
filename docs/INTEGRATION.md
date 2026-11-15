@@ -1,56 +1,43 @@
 # VandLabs Automotive Intelligence integration (optional)
 
-The website works on its own with its demo collection. A dealership that also subscribes to Intelligence connects the two by signing in, with nothing to copy between them.
+The website works on its own (see DEPLOYMENT.md). A dealership that also subscribes to Intelligence connects the two by signing in, with nothing to copy between them. The contract is documented on the Intelligence side in `docs/WEBSITE_CONNECTION.md` of `Gaurav-7489/automobile_engine_used_cars`; this page is the website's half.
 
-Checked against `Gaurav-7489/automobile_engine_used_cars` (`apps/intelligence`), and run end to end against a local Intelligence build on PostgreSQL (see "Verified" below).
+## Connecting
 
-## Connecting (the owner signs in with their Intelligence email)
+1. Set `VANDLABS_API_URL` and `WEBSITE_SECRET` (24+ random characters, stable). Redeploy.
+2. The owner opens **`/connect`** (not linked, not indexed), signs in with their Intelligence email and password (and authenticator code), and presses **Connect Website**.
+3. Every page switches to the workspace's published stock; every enquiry type becomes a lead there.
 
-1. In the website's hosting settings, set `VANDLABS_API_URL` (the Intelligence address) and `WEBSITE_SECRET` (random text, 24+ characters, unique to this deployment). Redeploy.
-2. The dealership owner opens **`/connect`** on the website (not linked anywhere, not indexed), enters their Intelligence email and password (and authenticator code if they use one), and presses **Connect Website**.
-3. Done. Every page switches to the cars published in that workspace on the next visit. Enquiries about a car become leads in Intelligence.
+The website derives its key from `WEBSITE_SECRET` (`src/lib/vandlabs/connection.ts`); Intelligence stores only the key's hash, as a `website`-scope key named `Website: <host>`. Rotating `WEBSITE_SECRET` means connecting again (the old key is then revoked). Disconnect from `/connect` or Intelligence → Settings → API.
 
-How it works:
-
-- The website derives a read-only key from `WEBSITE_SECRET` (`src/lib/vandlabs/connection.ts`). It never stores a key or the password.
-- `/api/connect` (this site's server) sends the email, password, key and site address to Intelligence `POST /api/public/website/connect`. Intelligence signs the owner in exactly like its own sign-in page (same lockout and rate limits), checks they are the workspace **owner**, and stores the key's SHA-256 as an `inventory:read` API key named `Website: <host>`, valid for a year. Connecting again renews it.
-- The connection appears in Intelligence → Settings → API with a **Website** label. Revoking it there disconnects the website; **Disconnect** on `/connect` does the same. Both are in the Intelligence audit log.
-- The website checks the link at `GET /api/v1/website` (which workspace, renewal date) every `VANDLABS_REVALIDATE_SECONDS` (default 300).
+If Intelligence cannot be reached, the site keeps treating itself as connected: it shows the last known stock (or none) and queues enquiries for Intelligence. It never falls back to demo cars or demo enquiries.
 
 ## Stock: `src/lib/inventory/vandlabs.ts`
 
-- `GET {VANDLABS_API_URL}/api/v1/inventory` with the key. Only `published` cars that are `available` or `reserved` are shown, and demo cars are never mixed in.
-- Besides make, model, price, kilometres, fuel, transmission, owners and photos, Intelligence now also sends body type, colours, description, features (shown as highlights), categories (the site's lifestyle tabs), registration state (never the number) and headline specifications when they are recorded. Missing ones are hidden.
-- If Intelligence cannot be reached, the site shows an empty collection rather than demo cars.
+- `GET /api/v1/inventory`, cached under the `inventory` tag. Only published cars that are available or reserved are shown.
+- **Changes arrive by signed webhook**: Intelligence posts to `/api/webhooks/inventory` after the change commits. The site verifies the HMAC signature (secret = SHA-256 of its key), refuses timestamps more than 5 minutes off, acts on each event id once, then refreshes every stock page (`revalidateTag("inventory")`). Events carry stock ids only; the pages re-read stock through the authenticated API.
+- The scheduled refresh (`VANDLABS_REVALIDATE_SECONDS`, default 300) remains as the fallback for a missed event.
 
 ## Enquiries: `vandlabsDestination` in `src/lib/leads/destinations.ts`
 
-- Car enquiries go to `POST {VANDLABS_API_URL}/api/public/enquiry` with the workspace from the connection. They become leads with source **Website** on that car, in its branch, through Intelligence's normal follow-up rules and lead emails.
-- Sell-your-car, visit and general enquiries go to `LEAD_WEBHOOK_URL` if set, otherwise demo mode (Intelligence has no endpoint for those yet).
+`POST /api/v1/website/enquiries` with the key and the submission's `Idempotency-Key`. Types:
 
-## Same demo cars in both products
+| Website form | Contract type | In Intelligence |
+|---|---|---|
+| Car page, "Call me back" | `callback` | Lead on the car, task "Call the customer back" |
+| Car page, "Test drive" | `test_drive` | Lead with the requested slot to confirm |
+| Car page, "Price & finance" | `price` | Lead on the car |
+| Car page, "WhatsApp me" | `whatsapp` | Lead, source WhatsApp |
+| Sell your car | `sell` | Acquisition enquiry (lead with the customer's car details) |
+| Showroom, book a visit | `visit` | Lead with the requested visit to confirm |
+| Other forms | `general` | Lead, unspecified interest |
 
-`packages/demo-data/src/vluce.ts` in the Intelligence repository is generated from this site's `src/data/vehicles.ts`. To show a dealership both products with the same 25 cars, create a demo workspace and run there:
+A customer is told "we have your enquiry" only once Intelligence accepted it, or it is in the site's durable queue (`DATABASE_URL`). A sold or unpublished car is refused by Intelligence (404) and the customer is told it is no longer available. If Intelligence predates v2 (404/405 on the new route), car enquiries use the older `/api/public/enquiry`; other types stay queued.
 
-```
-OWNER_PASSWORD=... pnpm intelligence:load-vluce-demo --owner-email owner@example.com
-```
+## Analytics: `src/components/Analytics.tsx` → `/api/analytics`
 
-It adds the cars with their photos, descriptions and prices, publishes the 23 that are available or reserved, keeps the 2 "arriving soon" cars unpublished, and skips cars already loaded. Then connect this website from `/connect`.
+First-party and cookieless: one visit per browser tab, car views, and clicks on WhatsApp or call links (counted as clicks, never as enquiries). Visitors with Do Not Track or Global Privacy Control are not counted. The site's server forwards counts to Intelligence only while connected; otherwise they are dropped. Nothing goes to a third party. The dealer sees them in Intelligence → Reports → Website.
 
 ## Verified
 
-Local run, Intelligence production build plus this site's production build, Intelligence on PostgreSQL 16:
-
-- `/connect` with a wrong password: refused with Intelligence's message; nothing created.
-- Correct password: "Connected to VLuce Motor House"; `/collection` changed from the 25 demo cars to the workspace's 23 published cars (stock IDs `V-10xx`), with highlights and specifications on the detail page.
-- An enquiry on a connected car became lead `L-1001`, source `Website`, in Intelligence.
-- **Disconnect**: the site returned to the demo collection.
-
-## Not implemented yet
-
-| Capability | Status |
-|---|---|
-| Instant refresh when stock changes in Intelligence | Pages refresh within `VANDLABS_REVALIDATE_SECONDS`. A push from Intelligence could call `revalidateTag("inventory")`. |
-| Sell, visit and general enquiries into Intelligence | Needs a new Intelligence endpoint. |
-| Website traffic analytics into Intelligence | No ingestion API; UTM source and campaign already travel with each enquiry. |
+`tests/ecosystem/website-journey.spec.ts` in the Intelligence repository runs both production builds on PostgreSQL: the dealer adds and publishes a car → the website shows it via the webhook → a customer on a phone requests a test drive → the lead is in Intelligence (type, car, UTM, follow-up task) → reserving the car removes it from the website → a late enquiry for it is refused.

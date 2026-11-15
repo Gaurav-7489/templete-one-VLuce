@@ -20,7 +20,7 @@
   --line-strong: rgba(0, 0, 0, 0.3);
   --line-dark: rgba(0, 0, 0, 0.12);
   --success: #1f8a4c;
-  --warn: #a8741a;
+  --warn: #8a5d12; /* 5.8:1 with white text (badges) */
   --wa: #25d366;
 
   --font-display: var(--font-sans), system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
@@ -772,6 +772,12 @@ ol {
 .hero__media {
   position: absolute;
   inset: 0;
+}
+/* White type sits on this band: while the photo loads (or if it fails) the band stays dark, so the text is always readable. */
+.hero__media .photo,
+.hero__media .photo__fallback {
+  background: #161616;
+  color: #6f6f6f;
 }
 .hero__media::after {
   content: "";
@@ -2242,3 +2248,10 @@ ol {
 .menu__aside .photo__fallback {
   display: none;
 }
+
+/* ── Showroom questions (short, factual answers) ─────── */
+.faq dl { margin: 32px 0 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.faq__item { padding: 20px 0; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+@media (min-width: 900px) { .faq__item { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; } }
+.faq dt { font-weight: 600; }
+.faq dd { margin: 0; color: var(--text-2); }

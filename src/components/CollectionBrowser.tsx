@@ -65,7 +65,7 @@ export function CollectionBrowser({ vehicles }: { vehicles: Vehicle[] }) {
                 {results.length} {results.length === 1 ? "car" : "cars"}
                 {results.length !== vehicles.length && ` of ${vehicles.length}`}
               </span>
-              <div className="chips" aria-label="Active filters">
+              <div className="chips" role="group" aria-label="Active filters">
                 {active.map((a) => (
                   <button key={a.label} type="button" className="chip chip--remove" onClick={() => update(a.clear)} aria-label={`Remove filter ${a.label}`}>
                     {a.label}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { faqJsonLd, ldScript, showroomFaq } from "@/lib/seo";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { Photo } from "@/components/Photo";
 import { Reveal } from "@/components/Reveal";
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
   description: `Visit ${dealership.showroom.name}. ${dealership.showroom.addressLines.join(", ")}, ${dealership.showroom.city}. Opening hours, directions and appointments.`,
   alternates: { canonical: "/showroom" },
 };
+
+const faq = showroomFaq();
 
 export default function ShowroomPage() {
   return (
@@ -61,6 +64,21 @@ export default function ShowroomPage() {
             <EnquiryForm kind="visit" withVisit submitLabel="Request appointment" idPrefix="visit" />
           </Reveal>
         </div>
+      </section>
+
+      <section className="section section--light" aria-labelledby="faq-h">
+        <div className="wrap faq">
+          <h2 className="display h-lg head__title" id="faq-h">Good to know</h2>
+          <dl>
+            {faq.map((f) => (
+              <div key={f.q} className="faq__item">
+                <dt>{f.q}</dt>
+                <dd>{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(faqJsonLd(faq))} />
       </section>
     </>
   );
