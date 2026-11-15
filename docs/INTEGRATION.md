@@ -2,13 +2,15 @@
 
 The website works on its own (see DEPLOYMENT.md). A dealership that also subscribes to Intelligence connects the two by signing in, with nothing to copy between them. The contract is documented on the Intelligence side in `docs/WEBSITE_CONNECTION.md` of `Gaurav-7489/automobile_engine_used_cars`; this page is the website's half.
 
-## Connecting
+## Linking (done by VandLabs)
 
-1. Set `VANDLABS_API_URL` and `WEBSITE_SECRET` (24+ random characters, stable). Redeploy.
-2. The owner opens **`/connect`** (not linked, not indexed), signs in with their Intelligence email and password (and authenticator code), and presses **Connect Website**.
-3. Every page switches to the workspace's published stock; every enquiry type becomes a lead there.
+Intelligence uses Google-only sign-in, so owners have no Intelligence password and never type credentials into their public website.
 
-The website derives its key from `WEBSITE_SECRET` (`src/lib/vandlabs/connection.ts`); Intelligence stores only the key's hash, as a `website`-scope key named `Website: <host>`. Rotating `WEBSITE_SECRET` means connecting again (the old key is then revoked). Disconnect from `/connect` or Intelligence → Settings → API.
+1. VandLabs opens the Intelligence admin console → the dealership → **Website**, enters this site's address, and copies the key it shows once.
+2. In this website's hosting (Vercel → Settings → Environment Variables) set `VANDLABS_API_URL` (the Intelligence address) and `VANDLABS_API_KEY` (the key). Redeploy.
+3. `/connect` (not linked, not indexed) now shows "Linked to <dealership>". Stock, enquiries, analytics and signed inventory webhooks all use that key; the webhook secret is the key's SHA-256, so nothing else is configured.
+
+Relinking in the admin console replaces the key (update `VANDLABS_API_KEY`); unlinking stops the website at once. Websites connected earlier with `WEBSITE_SECRET` keep working. The old owner-password form at `/connect` exists only with `LEGACY_PASSWORD_CONNECT=enabled`, for an Intelligence deployment that still allows password sign-in.
 
 If Intelligence cannot be reached, the site keeps treating itself as connected: it shows the last known stock (or none) and queues enquiries for Intelligence. It never falls back to demo cars or demo enquiries.
 

@@ -21,6 +21,8 @@ const problem = (status: number, message: string, code?: string) => NextResponse
  * site's server straight to Intelligence and are never stored or logged here.
  */
 export async function POST(request: Request) {
+  // Websites are now linked by VandLabs with a server-to-server key (VANDLABS_API_KEY). Owners never type a password into a website.
+  if (process.env.LEGACY_PASSWORD_CONNECT?.trim().toLowerCase() !== "enabled") return problem(410, "This website is linked by VandLabs. Ask VandLabs support.", "gone");
   const origin = request.headers.get("origin");
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   if (!origin || !host || new URL(origin).host !== host) return problem(403, "Request origin is not allowed.");
