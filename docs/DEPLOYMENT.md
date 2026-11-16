@@ -34,12 +34,12 @@ CRON_SECRET=<random>  LEADS_ADMIN_TOKEN=<random 24+>
 ```
 NEXT_PUBLIC_SITE_URL=https://www.dealer.example
 VANDLABS_API_URL=https://<intelligence host>
-WEBSITE_SECRET=<random 24+, keep stable>
+VANDLABS_API_KEY=<key issued by VandLabs in the Intelligence admin console>
 DATABASE_URL=…  CRON_SECRET=…  LEADS_ADMIN_TOKEN=…
 LEAD_WEBHOOK_URL=…                                 # optional: used if the site is later disconnected
 ```
 
-Then the owner opens `/connect` and signs in. Deploy Intelligence (with migration 0023) **before** this website version.
+VandLabs issues the key (admin console → dealership → Website); `/connect` then shows "Linked". Deploy Intelligence (migrations 0023 and 0024) **before** this website version.
 
 ## What the customer is told
 
