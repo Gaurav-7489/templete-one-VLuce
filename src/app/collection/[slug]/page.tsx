@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmiCalculator } from "@/components/EmiCalculator";
 import { EnquiryForm } from "@/components/EnquiryForm";
+import { TrackView } from "@/components/Analytics";
+import { breadcrumbJsonLd, ldScript, vehicleJsonLd } from "@/lib/seo";
 import { Gallery } from "@/components/Gallery";
 import { WhatsApp } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
@@ -29,11 +31,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const v = await getVehicle((await params).slug);
   if (!v) return { title: "Vehicle not found" };
   const title = vehicleTitle(v);
+  const where = v.availability === "reserved" ? "Reserved at" : v.availability === "coming-soon" ? "Arriving soon at" : "Available at";
+  const description = `${title} · ${formatKm(v.km)} · ${v.fuel} · ${v.transmission} · ${formatPrice(v.price)}. ${where} ${dealership.name}, ${v.city}.`;
   return {
     title,
-    description: `${title} · ${formatKm(v.km)} · ${v.fuel} · ${v.transmission} · ${formatPrice(v.price)}. Available at ${dealership.name}, ${v.city}.`,
+    description,
     alternates: { canonical: `/collection/${v.slug}` },
-    openGraph: { title, images: v.images[0] ? [{ url: v.images[0] }] : undefined },
+    openGraph: { type: "website", title, description, url: `/collection/${v.slug}`, images: v.images[0] ? [{ url: v.images[0] }] : undefined },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -75,37 +80,11 @@ export default async function VehiclePage({ params }: Params) {
   ].filter(([, val]) => val) as [string, string][];
   const specs = (Object.keys(specLabels) as (keyof VehicleSpecs)[]).filter((k) => v.specs[k]).map((k) => [specLabels[k], v.specs[k]!] as const);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Car",
-    name: title,
-    brand: { "@type": "Brand", name: v.brand },
-    model: v.model,
-    vehicleConfiguration: v.variant,
-    vehicleModelDate: String(v.year),
-    mileageFromOdometer: { "@type": "QuantitativeValue", value: v.km, unitCode: "KMT" },
-    fuelType: v.fuel,
-    vehicleTransmission: v.transmission,
-    color: v.exterior || undefined,
-    bodyType: v.bodyType || undefined,
-    numberOfPreviousOwners: v.owners,
-    itemCondition: "https://schema.org/UsedCondition",
-    image: v.images,
-    sku: v.stockId,
-    url: `${siteUrl}/collection/${v.slug}`,
-    offers: v.price
-      ? {
-          "@type": "Offer",
-          price: v.price,
-          priceCurrency: "INR",
-          availability: v.availability === "available" ? "https://schema.org/InStock" : v.availability === "reserved" ? "https://schema.org/LimitedAvailability" : "https://schema.org/PreOrder",
-          seller: { "@type": "AutoDealer", name: dealership.name },
-        }
-      : undefined,
-  };
+  const jsonLd = [vehicleJsonLd(v, title), breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Collection", path: "/collection" }, { name: v.brand, path: `/collection?brand=${encodeURIComponent(v.brand)}` }, { name: title, path: `/collection/${v.slug}` }])];
 
   return (
-    <div className="has-mobile-bar">
+    <div className="has-mobile-bar" data-stock-id={v.stockId}>
+      <TrackView stockId={v.stockId} />
       <section className="vd-hero">
         <div className="wrap">
           <ol className="crumbs" aria-label="Breadcrumb">
@@ -219,7 +198,7 @@ export default async function VehiclePage({ params }: Params) {
         <a className="btn" href={whatsappLink(waText)} target="_blank" rel="noopener"><WhatsApp width={16} height={16} /> WhatsApp</a>
         <a className="btn btn--ghost" href="#enquire">Enquire</a>
       </div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(jsonLd)} />
     </div>
   );
 }

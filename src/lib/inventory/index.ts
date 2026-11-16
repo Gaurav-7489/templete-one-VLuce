@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { dealership } from "@/config/dealership";
 import type { Vehicle } from "../types";
-import { getConnection, intelligenceUrl, websiteKey } from "../vandlabs/connection";
+import { connectionState, intelligenceUrl, websiteKey } from "../vandlabs/connection";
 import { demoSource } from "./demo";
 import type { InventorySource } from "./source";
 import { vandlabsSource } from "./vandlabs";
@@ -15,7 +15,8 @@ export async function inventorySource(): Promise<InventorySource> {
   if (process.env.INVENTORY_SOURCE === "demo") return demoSource;
   const baseUrl = intelligenceUrl();
   const apiKey = websiteKey();
-  if (baseUrl && apiKey && (process.env.INVENTORY_SOURCE === "vandlabs" || (await getConnection()))) {
+  // "unreachable" keeps the Intelligence source: an outage shows the last known stock (or none), never demo cars on a connected site.
+  if (baseUrl && apiKey && (process.env.INVENTORY_SOURCE === "vandlabs" || (await connectionState()).state !== "disconnected")) {
     return vandlabsSource({ baseUrl, apiKey, city: dealership.showroom.city, revalidate: Number(process.env.VANDLABS_REVALIDATE_SECONDS) || 300 });
   }
   if (process.env.INVENTORY_SOURCE === "vandlabs") console.warn("INVENTORY_SOURCE=vandlabs but VANDLABS_API_URL or a key is missing; using demo inventory.");

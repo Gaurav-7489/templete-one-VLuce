@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import { Suspense } from "react";
+import { Analytics } from "@/components/Analytics";
+import { dealerJsonLd, ldScript } from "@/lib/seo";
 import { Attribution } from "@/components/Attribution";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -27,25 +29,6 @@ export const viewport: Viewport = { themeColor: "#000000", width: "device-width"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const brands = (await getBrands()).map((b) => b.brand).sort((a, b) => (brandOrder.indexOf(a) + 1 || 99) - (brandOrder.indexOf(b) + 1 || 99));
-  const org = {
-    "@context": "https://schema.org",
-    "@type": "AutoDealer",
-    name: dealership.name,
-    url: siteUrl,
-    telephone: dealership.contact.phone,
-    email: dealership.contact.email,
-    image: dealership.showroom.image,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: dealership.showroom.addressLines.join(", "),
-      addressLocality: dealership.showroom.city,
-      addressRegion: dealership.showroom.region,
-      postalCode: dealership.showroom.postalCode,
-      addressCountry: dealership.showroom.country,
-    },
-    ...(dealership.showroom.geo && { geo: { "@type": "GeoCoordinates", latitude: dealership.showroom.geo.lat, longitude: dealership.showroom.geo.lng } }),
-    sameAs: dealership.social.map((s) => s.href),
-  };
   return (
     <html lang="en-IN" className={sans.variable}>
       <body>
@@ -57,7 +40,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Footer brands={brands} />
         <WhatsAppFab />
         <Attribution />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(org).replace(/</g, "\\u003c") }} />
+        <Analytics />
+        <script type="application/ld+json" dangerouslySetInnerHTML={ldScript(dealerJsonLd())} />
       </body>
     </html>
   );

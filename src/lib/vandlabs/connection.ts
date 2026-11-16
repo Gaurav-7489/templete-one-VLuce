@@ -31,27 +31,39 @@ export function websiteKey(): string | null {
 /** Whether this deployment can be connected from /connect (it has an Intelligence address and a secret). */
 export const connectable = () => !!intelligenceUrl() && !!process.env.WEBSITE_SECRET && (process.env.WEBSITE_SECRET?.trim().length ?? 0) >= 24;
 
+/** What the website knows about its link: connected, not connected (Intelligence said no), or unknown (Intelligence did not answer). */
+export type ConnectionState = { state: "connected"; connection: Connection } | { state: "disconnected" } | { state: "unreachable" };
+
 /**
- * The live connection, or null. Checked against Intelligence and cached for the inventory refresh window, so a
- * connection made or ended in either product takes effect within minutes (immediately after /connect, which
- * clears the cache).
+ * Checks the link against Intelligence, cached for the inventory refresh window (and cleared on /connect and by an inventory event).
+ * "disconnected" means Intelligence answered and refused the key. "unreachable" means it did not answer, which must never be read as
+ * "not connected": a connected dealership would otherwise silently get demo stock and demo enquiries during an outage.
  */
-export async function getConnection(): Promise<Connection | null> {
+export async function connectionState(): Promise<ConnectionState> {
   const base = intelligenceUrl();
   const key = websiteKey();
-  if (!base || !key) return null;
+  if (!base || !key) return { state: "disconnected" };
   try {
     const res = await fetch(new URL("/api/v1/website", base), {
       headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
       next: { revalidate: Number(process.env.VANDLABS_REVALIDATE_SECONDS) || 300, tags: ["vandlabs-connection", "inventory"] },
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return null;
+    if (res.status === 401 || res.status === 403 || res.status === 404) return { state: "disconnected" };
+    if (!res.ok) return { state: "unreachable" };
     const body = (await res.json()) as { data?: Partial<Connection> };
     const d = body.data;
-    return d?.tenantId ? { tenantId: d.tenantId, dealership: d.dealership ?? "", site: d.site ?? "", expiresAt: d.expiresAt ?? null } : null;
+    return d?.tenantId
+      ? { state: "connected", connection: { tenantId: d.tenantId, dealership: d.dealership ?? "", site: d.site ?? "", expiresAt: d.expiresAt ?? null } }
+      : { state: "disconnected" };
   } catch (error) {
     console.error(JSON.stringify({ event: "vandlabs_connection_unreachable", message: error instanceof Error ? error.message : "unknown" }));
-    return null;
+    return { state: "unreachable" };
   }
+}
+
+/** The live connection, or null when the website is not connected (or Intelligence cannot be reached right now). */
+export async function getConnection(): Promise<Connection | null> {
+  const result = await connectionState();
+  return result.state === "connected" ? result.connection : null;
 }

@@ -52,3 +52,12 @@ Next.js 15 (App Router, static generation + ISR), React 19, TypeScript, and hand
 ## Demo content
 
 The inventory in `src/data/vehicles.ts` is realistic **demo data**, not offers. Photography is hotlinked from Unsplash under the Unsplash License to preview the layout. It's illustrative and doesn't show the specific listed vehicles. A client deployment replaces both with the dealership's own stock and photography. No third-party trademarks, logos or proprietary content are used. Brand names show up only as plain text, to describe the vehicles.
+
+## Reliability and integration (2026-11)
+
+- Enquiries are acknowledged only when delivered or durably queued; production never silently falls back to demo mode. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+- Website only, website + Intelligence, or Intelligence only: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#three-ways-a-dealership-can-use-the-website).
+- Integration contract (all enquiry types, signed inventory webhooks, cookieless analytics): [docs/INTEGRATION.md](docs/INTEGRATION.md).
+- New templates: [docs/TEMPLATES.md](docs/TEMPLATES.md).
+
+Checks: `npm run lint`, `npm run typecheck`, `npm test` (unit + integration, PostgreSQL via PGlite), `npm run build`, `npm run test:browser` (against a running build).

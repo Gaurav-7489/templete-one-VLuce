@@ -26,15 +26,29 @@ const intents: { v: VehicleIntent; label: string }[] = [
 
 export type SubmitState = { status: "idle" | "sending" | "done" | "error"; reference?: string; demo?: boolean; message?: string; fields?: Record<string, string> };
 
-export async function postEnquiry(body: Record<string, unknown>): Promise<SubmitState> {
+const newKey = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`);
+
+/**
+ * One key per form submission. Pressing Send again after a timeout reuses it, so the dealership receives one enquiry, not two.
+ * It is renewed after a success, so a genuinely new enquiry from the same form is not mistaken for a repeat.
+ */
+export function useSubmissionKey(): [string, () => void] {
+  const [key, setKey] = useState(newKey);
+  return [key, () => setKey(newKey())];
+}
+
+export async function postEnquiry(body: Record<string, unknown>, idempotencyKey?: string): Promise<SubmitState> {
   try {
     const res = await fetch("/api/enquiry", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, ...readAttribution(), page: location.pathname }),
+      body: JSON.stringify({ ...body, ...readAttribution(), page: location.pathname, idempotencyKey }),
     });
     const data = await res.json().catch(() => ({}));
-    if (res.ok) return { status: "done", reference: data.reference, demo: data.demo };
+    if (res.ok) {
+      window.dispatchEvent(new CustomEvent("vluce:enquiry", { detail: { kind: body.kind, intent: body.intent, stockId: body.stockId } }));
+      return { status: "done", reference: data.reference, demo: data.demo };
+    }
     return { status: "error", message: data.message ?? "Something went wrong. Please call or WhatsApp us.", fields: data.fields };
   } catch {
     return { status: "error", message: "You appear to be offline. Please call or WhatsApp us." };
@@ -56,6 +70,7 @@ export function Received({ state, whatsappText }: { state: SubmitState; whatsapp
 
 export function EnquiryForm({ kind, vehicle, defaultIntent = "call", withVisit, submitLabel = "Send enquiry", idPrefix = "enq" }: Props) {
   const [state, setState] = useState<SubmitState>({ status: "idle" });
+  const [key, renewKey] = useSubmissionKey();
   const f = state.fields ?? {};
   const today = new Date().toISOString().slice(0, 10);
 
@@ -63,8 +78,8 @@ export function EnquiryForm({ kind, vehicle, defaultIntent = "call", withVisit, 
     e.preventDefault();
     const d = new FormData(e.currentTarget);
     setState({ status: "sending" });
-    setState(
-      await postEnquiry({
+    const result = await postEnquiry(
+      {
         kind,
         name: d.get("name"),
         phone: d.get("phone"),
@@ -77,8 +92,11 @@ export function EnquiryForm({ kind, vehicle, defaultIntent = "call", withVisit, 
         consent: d.get("consent") === "on",
         marketing: d.get("marketing") === "on",
         website: d.get("website"),
-      }),
+      },
+      key,
     );
+    if (result.status === "done") renewKey();
+    setState(result);
   }
 
   if (state.status === "done")

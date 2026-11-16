@@ -7,42 +7,58 @@ VandLabs sells two independent products:
 | | Dealership website (this repo) | Automotive Intelligence |
 |---|---|---|
 | Who uses it | The dealership's customers | The dealership's team |
-| Works alone | **Yes**: demo/own inventory, enquiries by webhook | **Yes**: no website required |
+| Works alone | **Yes**: own inventory file, enquiries to the dealer's CRM by webhook | **Yes**: no website required |
 | Branding | The dealership's, entirely | VandLabs |
 
-When a dealership buys both, the website connects to Intelligence through **adapters** (see INTEGRATION.md). The website never imports Intelligence code, never requires it, and shows no VandLabs promotion to customers. A subtle "Crafted by VandLabs Studio" footer credit is controlled by `showStudioCredit` in the config.
+When a dealership buys both, the website connects through **adapters** (INTEGRATION.md). The website never imports Intelligence code and never requires it.
 
-## Layout
+## Layers
 
 ```
 src/
-  config/dealership.ts      ← everything that identifies the dealership (name, contact, showroom, copy, imagery)
-  data/vehicles.ts          ← demo inventory
-  data/catalog.ts           ← brand order, lifestyle categories
-  lib/
-    types.ts                ← the website's Vehicle model; every source maps into it
-    filters.ts              ← pure filter/sort/URL logic
-    format.ts               ← ₹ Lakh/Cr, km, labels
-    inventory/
-      source.ts             ← InventorySource interface
-      demo.ts               ← built-in demo source
-      vandlabs.ts           ← Intelligence Business API adapter (verified)
-      index.ts              ← picks a source from INVENTORY_SOURCE
+  config/dealership.ts    ← identity: name, contact, showroom, copy, imagery              (per dealership)
+  data/                   ← demo / website-only inventory, brand order, categories         (per dealership)
+  components/ + globals.css ← the visual design                                           (per TEMPLATE)
+  app/ (pages)            ← page composition                                               (per TEMPLATE)
+  app/api/                ← enquiry, connect, webhooks, analytics, health, lead queue      (shared)
+  lib/                    ← business layer                                                 (shared)
+    types.ts              ← the Vehicle model every source maps into
+    filters.ts format.ts  ← search/filter/sort, ₹ formatting
+    seo.ts                ← AutoDealer, Car/Offer, BreadcrumbList, FAQ — known facts only
+    ratelimit.ts          ← shared (database) limiter, per-instance fallback, origin check
+    inventory/            ← InventorySource interface; demo and Intelligence sources
     leads/
-      types.ts              ← Lead + LeadDestination interface
-      validate.ts           ← server-side validation (customer-friendly messages)
-      destinations.ts       ← demo / webhook / vandlabs destinations + routing
-  app/
-    api/enquiry/route.ts    ← single endpoint for every form (origin check, honeypot, rate limit)
-    …pages
-  components/               ← UI; home/ holds the homepage sections
+      types.ts            ← Lead, enquiry types (the integration contract), destination interface
+      validate.ts         ← customer-facing validation
+      config.ts           ← destination mode, demo rules, backoff
+      destinations.ts     ← Intelligence, webhook, demo; resolveDestination()
+      store.ts db.ts      ← durable queue on any PostgreSQL (optional)
+      service.ts          ← submitLead(): idempotency, delivery, retry, dead letter
+    vandlabs/             ← connection (key derivation, link state), webhook verification
 ```
 
-## Data flow
+## Enquiry flow
 
-- **Inventory**: server components call `getInventory()`, which uses the configured source. Pages are statically generated and revalidate every 5 minutes (ISR), so a connected inventory refreshes without redeploying. Sold and draft vehicles are never listed.
-- **Enquiries**: forms post to `/api/enquiry`. The server validates the request, then `routeLead()` gives it to the first destination that accepts it: Intelligence (vehicle enquiries only), then the webhook, then demo. API keys stay on the server.
+```
+form ──POST /api/enquiry──▶ origin check · size limit · honeypot · validation · shared rate limit · car still listed?
+                              │
+                              ▼
+                       resolveDestination()  ── none (production) ──▶ 503 "not available" (never a fake success)
+                              │                └─ demo (explicit only) ─▶ "Demo mode" confirmation
+                              ▼
+            DATABASE_URL? ── no ──▶ deliver now ─ ok ─▶ "we have your enquiry"
+                │                              └ fail ─▶ honest error, same key on retry
+               yes
+                ▼
+       store once (Idempotency-Key, 10-minute fingerprint) ─▶ "we have your enquiry" (durably accepted)
+                ▼
+       deliver now ─ fail ─▶ retry with backoff (each submission, daily cron) ─▶ after 8: failed, staff requeue
+```
 
-## Future templates (02–06)
+## Inventory flow
 
-Template-specific code is the visual layer: `globals.css` and `components/`. Everything else (config shape, Vehicle model, inventory sources, lead destinations, filters, SEO) is template-agnostic. To start Template 02, copy the repository, keep `config/`, `data/`, `lib/` and `app/api/`, and redesign `components/` and `globals.css`. A later step could extract `lib/` into a shared package once a second template exists to prove the boundary.
+Pages are statically generated and cached under the `inventory` tag. Intelligence's signed webhook clears that tag when published stock changes; the scheduled refresh (300 s) is the fallback. Sold and unpublished cars are never listed, and a car enquiry is refused unless the car is still listed.
+
+## Future templates
+
+See TEMPLATES.md.
